@@ -1,0 +1,64 @@
+{
+    "diagnostic.level": "hint",
+    "diagnostic.enable": true,
+    "diagnostic.errorSign": "🔥",
+    "diagnostic.warningSign": "🚬",
+    "python.jediEnabled": true,
+    "languageserver": {
+      "golang": {
+        "command": "gopls",
+        "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+        "filetypes": ["go"]
+      },
+      "ccls": {
+        "command": "ccls",
+        "filetypes": ["c", "cpp", "cuda", "objc", "objcpp"],
+        "rootPatterns": [".ccls", "compile_commands.json", ".vim/", ".git/", ".hg/"],
+        "initializationOptions": {
+           "cache": {
+             "directory": ".ccls-cache"
+           }
+         }
+      }
+    },
+	"list.indicator": " ►",
+  	"list.insertMappings": {
+  	  "<C-t>": "action:tabe",
+  	  "<C-w>": "command:wincmd k"
+  	},
+  	"lists.disabledLists": [
+  	  "words",
+  	  "lines",
+  	  "locationlist",
+  	  "location"
+  	],
+  	"list.source.mru.excludePatterns": [
+  	  "**/.git/*",
+  	  "/tmp/*",
+  	  "**/vendor/*"
+  	],
+  	"list.source.grep.command": "rg",
+  	"list.source.grep.args": [
+  	  "-i",
+  	  "--vimgrep",
+  	  "--no-heading",
+  	  "-uu"
+  	],
+  	"list.source.grep.excludePatterns": [
+  	  "**/.git/*",
+  	  "/tmp/*",
+  	  "**/vendor/*"
+  	],
+  	"list.source.files.command": "rg",
+  	"list.source.files.args": [
+  	  "--hidden",
+  	  "--files",
+  	  "--glob",
+  	  "!.git"
+  	],
+  	"list.source.files.excludePatterns": [
+  	  "**/.git/*",
+  	  "/tmp/*",
+  	  "**/vendor/*"
+  	]
+}
