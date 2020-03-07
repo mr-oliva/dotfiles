@@ -1,6 +1,8 @@
 1password
 alfred
 clipy
+docker
 firefox-developer-edition
 iterm2
+postman
 slack
