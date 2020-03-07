@@ -1,5 +1,5 @@
 inoremap <silent> jj <ESC>
-nnoremap <silent> cp :set clipboard=unnamedplus<CR><CR>
+nnoremap <silent> cp :set clipboard=unnamedplus<CR>
 set noswapfile
 set title
 set number
@@ -7,7 +7,11 @@ set tabstop=4
 set expandtab
 set shiftwidth=4
 set mouse=a
-set termguicolors
+set hidden
+
+tnoremap <C-[> <C-\><C-n>
+
+"set termguicolors
 "let g:python3_host_prog = expand('~/.pyenv/versions/3.6.8/bin/python')
 if has("autocmd")
     filetype plugin on
@@ -21,15 +25,55 @@ endif
 
 call plug#begin('~/.local/share/nvim/plugged')
 
+Plug 'glacambre/firenvim', { 'do': { _ -> firenvim#install(0) } }
+let g:firenvim_config = {
+    \ 'localSettings': {
+        \ '.*': {
+            \ 'selector': 'textarea',
+            \ 'priority': 0,
+        \ },
+        \ 'github\.com': {
+            \ 'selector': 'textarea',
+            \ 'priority': 1,
+        \ },
+    \ }
+\ }
+
+let g:dont_write = v:false
+function! My_Write(timer) abort
+	let g:dont_write = v:false
+	write
+endfunction
+
+function! Delay_My_Write() abort
+	if g:dont_write
+		return
+	end
+	let g:dont_write = v:true
+	call timer_start(10000, 'My_Write')
+endfunction
+
+au TextChanged * ++nested call Delay_My_Write()
+au TextChangedI * ++nested call Delay_My_Write()
+
+augroup Firenvim
+  au BufEnter play.golang.org_*.txt set filetype=go
+  au BufEnter play.rust-lang.org_*.txt set filetype=rust
+  au BufEnter github.com_*.txt set filetype=markdown
+augroup END
+
+Plug 'mattn/vim-goimports'
 
 Plug 'Shougo/deol.nvim'
 let g:deol#shell_history_path = '~/.zsh_history'
 nnoremap <silent> <Leader>df :<C-u>Deol -split=floating<CR>
 nnoremap <silent> <Leader>dv :<C-u>Deol -split=vertical<CR>
-nnoremap <silent> <Leader>dh :<C-u>Deol -split=horizontal<CR>
+nnoremap <silent> <Leader>ds :<C-u>Deol -split=horizontal<CR>
+nmap <silent> <Leader>bg <Plug>(deol_bg)
 
-
+Plug 'chrisbra/csv.vim'
 " (Optional) Multi-entry selection UI.
+Plug 'junegunn/fzf.vim'
 Plug 'junegunn/fzf'
 let g:fzf_action = {
   \ 'ctrl-t': 'tab split',
@@ -37,51 +81,53 @@ let g:fzf_action = {
   \ 'ctrl-v': 'vsplit' }
 let g:fzf_buffers_jump = 1
 
-Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
-Plug 'neoclide/coc-tsserver', {'do': 'yarn install --frozen-lockfile'}
-" Remap keys for gotos
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-nmap <silent> rn <Plug>(coc-rename)
-nmap <silent> ft <Plug>(coc-format)
-
-autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
-
-" Use K for show documentation in preview window
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-function! s:show_documentation()
-  if &filetype == 'vim'
-    execute 'h '.expand('<cword>')
-  else
-    if coc#util#has_float()
-        pc
-    else
-        call CocAction('doHover')
-    endif
-  endif
-endfunction
-
-autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-augroup mygroup
-  autocmd!
-  " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json,go setl formatexpr=CocAction('formatSelected')
-  " Update signature help on jump placeholder
-  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-augroup end
-
-" Highlight symbol under cursor on CursorHold
-autocmd CursorHold * silent call CocActionAsync('highlight')
+"Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
+"Plug 'neoclide/coc-tsserver', {'do': 'yarn install --frozen-lockfile'}
+"command! -nargs=0 Format :call CocAction('format')
+"inoremap <silent><expr> <c-space> coc#refresh()
+"" Remap keys for gotos
+"nmap <silent> gd <Plug>(coc-definition)
+"nmap <silent> gy <Plug>(coc-type-definition)
+"nmap <silent> gi <Plug>(coc-implementation)
+"nmap <silent> gr <Plug>(coc-references)
+"nmap <silent> rn <Plug>(coc-rename)
+"nmap <silent> ft <Plug>(coc-format)
+"
+"" autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+"
+"" Use K for show documentation in preview window
+"nnoremap <silent> K :call <SID>show_documentation()<CR>
+"
+"function! s:show_documentation()
+"  if &filetype == 'vim'
+"    execute 'h '.expand('<cword>')
+"  else
+"    if coc#util#has_float()
+"        pc
+"    else
+"        call CocAction('doHover')
+"    endif
+"  endif
+"endfunction
+"
+"autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+"augroup mygroup
+"  autocmd!
+"  " Setup formatexpr specified filetype(s).
+"  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+"  " Update signature help on jump placeholder
+"  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+"augroup end
+"
+"" Highlight symbol under cursor on CursorHold
+"autocmd CursorHold * silent call CocActionAsync('highlight')
 
 
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
-let g:airline_theme='deus'
+let g:airline_theme='onedark'
 " ale
 "let g:airline#extensions#ale#enabled = 1
 "let g:airline#extensions#ale#error_symbol = '🔥'
@@ -95,60 +141,68 @@ let g:airline_section_hint = '%{airline#util#wrap(airline#extensions#coc#get_hin
 
 let g:airline#extensions#coc#error_symbol = '🔥'
 let g:airline#extensions#coc#warning_symbol = '🚬'
-"let g:airline#extensions#coc#stl_format_err = '%E{[%e(#%fe)]}'
-"let g:airline#extensions#coc#stl_format_warn = '%W{[%w(#%fw)]}'
+let g:airline#extensions#coc#stl_format_err = '%E{[%e(#%fe)]}'
+let g:airline#extensions#coc#stl_format_warn = '%W{[%w(#%fw)]}'
 
 "Plug 'w0rp/ale'
-"
+""
 "nnoremap <silent> <Leader>at :<C-u>ALEToggle<CR>
 "let g:ale_completion_enabled = 0
-"let g:ale_fix_on_save = 1
-"let g:ale_lint_on_text_changed = 'never'
-"let g:ale_lint_on_enter = 0
-"let g:ale_set_quickfix = 1
+"let g:ale_fix_on_save = 0
+""let g:ale_disable_lsp = 1
+""let g:ale_lint_on_text_changed = 'never'
+""let g:ale_lint_on_enter = 1
+""let g:ale_set_quickfix = 1
 "let g:ale_echo_msg_warning_str = '🚬'
 "let g:ale_echo_msg_error_str = '🔥'
 "let g:ale_sign_warning = '🚬'
 "let g:ale_sign_error = '🔥'
-"let g:ale_sign_style_warning = '🚬'
-"let g:ale_sign_style_error = '🔥'
-"let g:ale_sign_column_always = 1
+""let g:ale_sign_style_warning = '🚬'
+""let g:ale_sign_style_error = '🔥'
+""let g:ale_sign_column_always = 1
 "let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
-""let g:ale_linters = {
-""\   'go': ['golint'],
-""\   'ruby': ['rubocop'],
-""\   'vim': ['vint'],
-""\   'php': ['phpcs'],
-""\   'python': ['pylint'],
-""\   'cpp': ['cppcheck'],
-""\}
-""let g:ale_fixers = {
-""\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-""\   'go': ['gofmt','goimports'],
-""\   'ruby': ['rubocop'],
-""\   'elm': ['elm-format'],
-""\   'javascript': ['eslint'],
-""\   'python': ['autopep8', 'yapf'],
-""\}
+"let g:ale_linters = {
+"\   'go': ['golint'],
+"\   'ruby': ['rubocop'],
+"\   'vim': ['vint'],
+"\   'php': ['phpcs'],
+"\   'python': ['pylint'],
+"\   'cpp': ['cppcheck'],
+"\}
+"let g:ale_fixers = {
+"\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+"\   'go': ['gofmt','goimports'],
+"\   'ruby': ['rubocop'],
+"\   'elm': ['elm-format'],
+"\   'javascript': ['eslint'],
+"\   'python': ['autopep8', 'yapf'],
+"\   'rust': ['rustfmt'],
+"\}
 "let g:ale_statusline_format = ['🚬%d', '🔥%d', 'ok']
-"let g:ale_php_phpcs_standard = 'PSR2'
-"let g:ale_python_pylint_options = '--generate-members'
-""let g:ale_php_phpcs_use_global = 1
-"let g:ale_c_cppcheck_executable = 'cppcheck'
-"let g:ale_cpp_clang_options = "-std=c++14 -Wall -I/usr/local/eigen/"
-"let g:ale_cpp_gcc_options = "-I/usr/local/eigen"
-"let g:ale_echo_cursor=1
-
-
+""let g:ale_php_phpcs_standard = 'PSR2'
+""let g:ale_python_pylint_options = '--generate-members'
+"""let g:ale_php_phpcs_use_global = 1
+""let g:ale_c_cppcheck_executable = 'cppcheck'
+""let g:ale_cpp_clang_options = "-std=c++14 -Wall -I/usr/local/eigen/"
+""let g:ale_cpp_gcc_options = "-I/usr/local/eigen"
+""let g:ale_echo_cursor=1
+"
+"
 "" for markdown
 "augroup ale_custom
 "  autocmd!
 "  autocmd FileType markdown let g:ale_fix_on_save = 0
 "augroup END
 
-Plug 'dracula/vim', { 'as': 'dracula' }
+"Plug 'dracula/vim', { 'as': 'dracula' }
+"let g:dracula_colorterm = 0
 
 Plug 'joshdick/onedark.vim'
+let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+if (has("termguicolors"))
+    set termguicolors
+endif
+
 
 Plug 'othree/yajs.vim', {'for': 'javascript'}
 
@@ -156,25 +210,43 @@ Plug 'majutsushi/tagbar'
 nmap <F8> :TagbarToggle<CR>
 
 "Plug 'iamcco/markdown-preview.nvim', { 'do': ':call mkdp#util#install()', 'for': 'markdown', 'on': 'MarkdownPreview' }
-"Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
-" let g:mkdp_auto_close = 0
-" let g:mkdp_echo_preview_url = 1 
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
+"let g:mkdp_auto_close = 1
+let g:mkdp_echo_preview_url = 1
+let g:mkdp_browser = 'firefox'
+"let g:mkdp_refresh_slow=1
 "let g:mkdp_open_ip = system("ip a show eth0 | grep inet | grep -v inet6 | awk '{print $2}' | awk -F'/' '{print $1}'")
-" let g:mkdp_open_ip = "172.17.82.182"
-" let g:mkdp_port = '8080'
+"let g:mkdp_open_ip = $IP
+let g:mkdp_open_ip = 'localhost'
+let g:mkdp_port = '2851'
+let g:mkdp_page_title = '「${name}」'
 " 背景色が色でみえない
 "let g:mkdp_highlight_css="/home/bookun/highlightjs/dracula.css"
 "let g:mkdp_markdown_css="/home/bookun/node_modules/github-markdown-css/github-markdown.css"
 " autocmd FileType markdown nnoremap <LEADER>p :MarkdownPreview<CR>
 
 Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 " Trigger configuration. Do not use <tab> if you use
 " https://github.com/Valloric/YouCompleteMe.
-let g:UltiSnipsExpandTrigger="<c-k>"
+let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<c-l>"
 let g:UltiSnipsJumpBackwardTrigger="<c-h>"
+let g:UltiSnipsSnippetDirectories=['~/.config/nvim/Ultisnips/']
 
 Plug 'tpope/vim-fugitive'
+
+Plug 'airblade/vim-gitgutter'
+" Use fontawesome icons as signs
+let g:gitgutter_sign_added = '+'
+let g:gitgutter_sign_modified = '>'
+let g:gitgutter_sign_removed = '-'
+let g:gitgutter_sign_removed_first_line = '^'
+let g:gitgutter_sign_modified_removed = '<'
+nmap <silent> gs :GitGutterBufferToggle<CR>
+
+
+" let g:gitgutter_override_sign_column_highlight = 1
 
 Plug 'mattn/emmet-vim'
 
@@ -190,7 +262,7 @@ Plug 'andymass/vim-matchup'
 let g:loaded_matchit = 1
 autocmd VimEnter,Colorscheme * :hi MatchWord ctermfg=red guifg=blue cterm=underline gui=underline
 
-Plug 'leafgarland/typescript-vim', {'for': 'typescript'}
+"Plug 'leafgarland/typescript-vim', {'for': 'typescript'}
 
 "Plug 'posva/vim-vue'
 
@@ -198,18 +270,6 @@ Plug 'rhysd/git-messenger.vim'
 
 let g:git_messenger_include_diff='current'
 let g:git_messenger_always_into_popup=v:true
-
-"Plug 'skanehira/translate.vim'
-"
-" "翻訳元言語
-" let g:translate_source = "en"
-"
-" " 翻訳先言語
-" let g:translate_target = "ja"
-"
-" " 翻訳結果ウィンドウのサイズ
-" let g:translate_winsize = 10
-
 
 Plug 'segeljakt/vim-silicon'
 let g:silicon = {
@@ -228,10 +288,110 @@ let g:silicon = {
       \ 'window-controls':       v:true,
       \ }
 
+"Plug 'Shougo/deoplete.nvim'
+"let g:deoplete#enable_at_startup = 1
+"Plug 'lighttiger2505/deoplete-vim-lsp'
+
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
+"Plug 'mattn/vim-lsp-settings'
+setlocal omnifunc=lsp#complete
+let g:lsp_diagnostics_enabled = 1
+let g:lsp_signs_enabled = 1         " enable signs
+let g:lsp_diagnostics_echo_cursor = 1 " enable echo under cursor when in normal mode
+let g:lsp_highlight_references_enabled = 1
+let g:lsp_log_verbose = 1
+let g:lsp_signs_error = {'text': '🔥'}
+let g:lsp_signs_warning = {'text': '🚬'}
+let g:lsp_virtual_text_enabled = 0
+let g:lsp_log_file = expand('~/vim-lsp.log')
+if executable('gopls')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'gopls',
+        \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
+        \ 'whitelist': ['go'],
+        \ 'workspace_config': {'gopls': {
+        \       'completeUnimported': v:true,
+        \ }},
+        \ })
+    autocmd FileWritePre *.go "LspDocumentFormatSync<CR>"
+    nnoremap <silent> <Leader>fo :LspDocumentFormatSync<CR>
+endif
+if executable('ccls')
+    " .ccls, compile_commands.json, .git があるところをrouteにする
+    au User lsp_setup call lsp#register_server({
+            \ 'name': 'ccls',
+            \ 'cmd': {server_info->['ccls']},
+            \ 'root_uri':{server_info->lsp#utils#path_to_uri(
+            \   lsp#utils#find_nearest_parent_file_directory(
+            \       lsp#utils#get_buffer_path(),
+            \       ['.ccls', 'compile_commands.json', '.git/']
+            \   ))},
+            \ 'initialization_options': {},
+            \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp', 'cc'],
+            \ })
+endif
+if executable('clangd')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'clangd',
+        \ 'cmd': {server_info->['clangd', '-background-index']},
+        \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp'],
+        \ })
+endif
+if executable('intelephense')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'intelephense',
+        \ 'cmd': {server_info->['node', expand('/usr/local/lib/node_modules/intelephense/lib/intelephense.js'), '--stdio']},
+        \ 'initialization_options': {"storagePath": "/tmp/intelephense"},
+        \ 'whitelist': ['php'],
+        \ 'workspace_config': { 'intelephense': {
+        \   'files.associations': ['*.php'],
+        \ }},
+        \ })
+endif
+if executable('rls')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'rls',
+        \ 'cmd': {server_info->['rustup', 'run', 'stable', 'rls']},
+        \ 'workspace_config': {'rust': {'clippy_preference': 'on'}},
+        \ 'whitelist': ['rust'],
+        \ })
+endif
+if executable('pyls')
+ 	"pip install python-language-server
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pyls',
+        \ 'cmd': {server_info->['pyls']},
+        \ 'whitelist': ['python'],
+        \ })
+endif
+if executable('typescript-language-server')
+    au User lsp_setup call lsp#register_server({
+      \ 'name': 'javascript support using typescript-language-server',
+      \ 'cmd': { server_info->[&shell, &shellcmdflag, 'typescript-language-server --stdio']},
+      \ 'root_uri': { server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_directory(lsp#utils#get_buffer_path(), '.git/..'))},
+      \ 'whitelist': ['javascript', 'javascript.jsx', 'javascriptreact']
+      \ })
+endif
+nmap <silent> gd :LspDefinition<CR>
+nmap <silent> gi :LspImplementation<CR>
+nnoremap <silent> K :LspHover<CR>
+setlocal signcolumn=yes
+
+"Plug 'octol/vim-cpp-enhanced-highlight'
+"let g:cpp_class_scope_highlight = 1
+"let g:cpp_member_variable_highlight = 1
+"let g:cpp_class_decl_highlight = 1
+"let g:cpp_experimental_simple_template_highlight = 1
+"let g:cpp_concepts_highlight = 1
+"let g:cpp_no_function_highlight = 1
+
 call plug#end()
 
 
-"color onedark
+color onedark
 "color dracula
 
 syntax on
@@ -258,4 +418,8 @@ nnoremap <leader>e :call FzyCommand("find . -type f", ":e")<CR>
 nnoremap <leader>v :call FzyCommand("find . -type f", ":vs")<cr>
 nnoremap <leader>s :call FzyCommand("find . -type f", ":sp")<cr>
 
-colorscheme onedark
+"colorscheme onedark
+"let g:php_baselib       = 1
+"let g:php_htmlInStrings = 1
+"let g:php_noShortTags   = 1
+"let g:php_sql_query     = 1
