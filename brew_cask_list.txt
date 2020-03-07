@@ -1,0 +1,6 @@
+1password
+alfred
+clipy
+firefox-developer-edition
+iterm2
+slack
