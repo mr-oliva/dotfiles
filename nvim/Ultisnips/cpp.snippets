@@ -73,7 +73,7 @@ const int INF = 100000;
 char wall_char = '#';
 // 最短距離保存テーブル
 vector<vector<int>> d(MAX_N, vector<int>(MAX_M, INF));
-int dfs() {
+int bfs() {
   queue<P> que;
   que.push(P(sx, sy));
   d[sx][sy] = 0;
@@ -106,17 +106,27 @@ endsnippet
 snippet dfs "dfs with variables"
 #define MAX_N 100
 #define MAX_M 100
-int n, m;
+int W, H;
 char wall_char = 'W';
 vector<vector<char>> field(MAX_N, vector<char>(MAX_M));
-void dfs(int x, int y) {
-  field[x][y] = '.';
+vector<vector<bool>> reached(MAX_N, vector<bool>(MAX_M));
 
-  for (int dx = -1; dx <= 1; dx++) {
-    for (int dy = -1; dy <= 1; dy++) {
-      int nx = x + dx, ny = y + dy;
-      if (0 <= nx && nx < n && 0 <= ny && ny < m && field[nx][ny] == wall_char) dfs(nx, ny);
-    }
-  }
+void dfs(int x, int y) {
+  // 外側か壁の場合は何もしない
+  if (x < 0 || W <= x || y < 0 || H <= y || field[x][y] == wall_char ) return;
+
+  // 以前に到達していたら何もしない
+  if (reached[x][y]) return;
+
+  reached[x][y] = true; //到達したよ
+
+  dfs(x+1, y); //右
+  dfs(x-1, y); //左
+  dfs(x, y+1); //下
+  dfs(x, y-1); //上
 }
+endsnippet
+
+snippet tajigen "多次元vector"
+vector<vector<ll>> hoge(h, vector<ll>(w));
 endsnippet

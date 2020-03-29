@@ -1,8 +1,12 @@
 1password
 alfred
 clipy
+discord
 docker
 firefox-developer-edition
+google-chrome
+google-japanese-ime
 iterm2
 postman
 slack
+visual-studio-code

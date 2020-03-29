@@ -25,6 +25,8 @@ mac() {
     if [ -e $HOME/.tmux.conf ]; then
     	rm $HOME/.tmux.conf
     fi
+
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     
     cat brew_list.txt | xargs brew install
     cat brew_cask_list.txt | xargs brew cask install
