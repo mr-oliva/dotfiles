@@ -23,7 +23,7 @@ fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-eval `ssh-agent` && ssh-add $HOME/.ssh/id_rsa_reso
+#eval `ssh-agent` && ssh-add $HOME/.ssh/id_rsa_reso
 
 if [ $HOME/.zshrc -nt ~/.zshrc.zwc ]; then
   zcompile ~/.zshrc
