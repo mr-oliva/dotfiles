@@ -1,64 +1,46 @@
 {
-    "diagnostic.level": "hint",
-    "diagnostic.enable": true,
-    "diagnostic.errorSign": "🔥",
-    "diagnostic.warningSign": "🚬",
-    "python.jediEnabled": true,
+    "python.jediEnabled": false,
+    "eslint.filetypes" : ["javascript, typescript, vue"],
+    "eslint.autoFixOnSave": true,
     "languageserver": {
-      "golang": {
-        "command": "gopls",
-        "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-        "filetypes": ["go"]
+     "golang": {
+       "command": "gopls",
+       "rootPatterns": ["go.mod"],
+       "disableWorkspaceFolders": true,
+       "filetypes": ["go"],
+       },
+      "rust": {
+        "command": "rust-analyzer",
+        "filetypes": ["rust"],
+        "rootPatterns": ["Cargo.toml"]
       },
-      "ccls": {
-        "command": "ccls",
-        "filetypes": ["c", "cpp", "cuda", "objc", "objcpp"],
-        "rootPatterns": [".ccls", "compile_commands.json", ".vim/", ".git/", ".hg/"],
+      "intelephense": {
+        "command": "intelephense",
+        "args": ["--stdio"],
+        "filetypes": ["php"],
         "initializationOptions": {
-           "cache": {
-             "directory": ".ccls-cache"
-           }
-         }
-      }
-    },
-	"list.indicator": " ►",
-  	"list.insertMappings": {
-  	  "<C-t>": "action:tabe",
-  	  "<C-w>": "command:wincmd k"
-  	},
-  	"lists.disabledLists": [
-  	  "words",
-  	  "lines",
-  	  "locationlist",
-  	  "location"
-  	],
-  	"list.source.mru.excludePatterns": [
-  	  "**/.git/*",
-  	  "/tmp/*",
-  	  "**/vendor/*"
-  	],
-  	"list.source.grep.command": "rg",
-  	"list.source.grep.args": [
-  	  "-i",
-  	  "--vimgrep",
-  	  "--no-heading",
-  	  "-uu"
-  	],
-  	"list.source.grep.excludePatterns": [
-  	  "**/.git/*",
-  	  "/tmp/*",
-  	  "**/vendor/*"
-  	],
-  	"list.source.files.command": "rg",
-  	"list.source.files.args": [
-  	  "--hidden",
-  	  "--files",
-  	  "--glob",
-  	  "!.git"
-  	],
-  	"list.source.files.excludePatterns": [
-  	  "**/.git/*",
-  	  "/tmp/*",
-  	  "**/vendor/*"
-  	]
+            "storagePath": "/tmp/intelephense"
+        }
+      },
+      "dockerfile": {
+        "command": "docker-langserver",
+        "filetypes": ["dockerfile"],
+        "args": ["--stdio"]
+      },
+	  "bash": {
+      	"command": "bash-language-server",
+      	"args": ["start"],
+      	"filetypes": ["sh"],
+      	"ignoredRootPaths": ["~"]
+      },
+      "clangd": {
+      	"command": "clangd",
+      	"rootPatterns": ["compile_flags.txt", "compile_commands.json", ".git"],
+      	"filetypes": ["c", "cpp", "objc", "objcpp"]
+      },
+      "vls": {
+        "command": "vls",
+        "filetypes": ["vue"]
+      },
+    }
 }
