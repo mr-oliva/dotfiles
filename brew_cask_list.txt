@@ -1,12 +1,10 @@
 1password
+alacritty
 alfred
 clipy
 discord
-docker
 firefox-developer-edition
-google-chrome
-google-japanese-ime
-iterm2
+firefox-nightly
+microsoft-teams
 postman
-slack
-visual-studio-code
+wireshark

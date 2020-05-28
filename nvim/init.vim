@@ -1,5 +1,5 @@
-inoremap <silent> jj <ESC>
 nnoremap <silent> cp :set clipboard=unnamedplus<CR>
+nnoremap <silent> <Leader>cp :unset clipboard<CR>
 set noswapfile
 set title
 set number
@@ -10,6 +10,9 @@ set mouse=a
 set hidden
 set updatetime=300
 set background=dark
+set cursorline
+
+packadd termdebug
 
 syntax on
 
@@ -22,6 +25,8 @@ if has("autocmd")
 
     filetype indent on
     autocmd FileType javascript setlocal et sw=2 sts=2 ts=2
+    autocmd FileType typescript setlocal et sw=2 sts=2 ts=2
+    autocmd FileType typescriptreact setlocal et sw=2 sts=2 ts=2
     autocmd FileType vue setlocal et sw=2 sts=2 ts=2
     autocmd FileType cpp setlocal et sw=2 sts=2 ts=2
     autocmd FileType yaml setlocal et sw=2 sts=2 ts=2
@@ -32,47 +37,20 @@ autocmd ColorScheme * highlight CocHighlightText guibg=Green ctermbg=11
 
 call plug#begin('~/.local/share/nvim/plugged')
 
-"Plug 'glacambre/firenvim', { 'do': { _ -> firenvim#install(0) } }
-"let g:firenvim_config = {
-"    \ 'localSettings': {
-"        \ '.*': {
-"            \ 'selector': 'textarea',
-"            \ 'priority': 0,
-"        \ },
-"        \ 'github\.com': {
-"            \ 'selector': 'textarea',
-"            \ 'priority': 1,
-"        \ },
-"    \ }
-"\ }
-
-"let g:dont_write = v:false
-"function! My_Write(timer) abort
-"	let g:dont_write = v:false
-"	write
-"endfunction
-"
-"function! Delay_My_Write() abort
-"	if g:dont_write
-"		return
-"	end
-"	let g:dont_write = v:true
-"	call timer_start(10000, 'My_Write')
-"endfunction
-"
-"au TextChanged * ++nested call Delay_My_Write()
-"au TextChangedI * ++nested call Delay_My_Write()
-"
-"augroup Firenvim
-"  au BufEnter play.golang.org_*.txt set filetype=go
-"  au BufEnter play.rust-lang.org_*.txt set filetype=rust
-"  au BufEnter github.com_*.txt set filetype=markdown
-"augroup END
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 
+
+Plug 'cohama/lexima.vim'
+Plug 'ryanoasis/vim-devicons'
+let g:webdevicons_enable_airline_statusline = 1
+let g:webdevicons_enable_airline_tabline = 1
+
 "Plug 'pangloss/vim-javascript'
+Plug 'peitalin/vim-jsx-typescript', {'for': 'typescriptreact'}
 
 Plug 'mattn/vim-goimports'
+
+Plug 'editorconfig/editorconfig-vim'
 
 Plug 'Shougo/deol.nvim'
 let g:deol#shell_history_path = '~/.zsh_history'
@@ -91,7 +69,7 @@ let g:fzf_action = {
   \ 'ctrl-v': 'vsplit' }
 let g:fzf_buffers_jump = 1
 
-Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 command! -nargs=0 Format :call CocAction('format')
 inoremap <silent><expr> <c-space> coc#refresh()
 " Remap keys for gotos
@@ -101,10 +79,14 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 nmap <silent> rn <Plug>(coc-rename)
 nmap <silent> ft <Plug>(coc-format)
+nmap <silent> gl <Plug>(coc-codelens-action)
+nmap <silent> <Leader>lg :CocList grep<CR>
+nmap <silent> <Leader>lf :CocList files<CR>
+nmap <silent> <Leader>lb :CocList buffers<CR>
 set signcolumn=yes
 
 
-autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+" autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 
 " Use K for show documentation in preview window
 nnoremap <silent> K :call <SID>show_documentation()<CR>
@@ -143,8 +125,14 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+let g:airline#extensions#tagbar#enabled = 1
+let g:airline#extensions#tagbar#flags = 'f'
 "let g:airline_theme='onedark'
-let g:airline_theme='hybrid'
+"let g:airline_theme='one'
+"let g:airline_theme='oceanicnext'
+let g:airline_theme='palenight'
+"let g:airline_theme='hybrid'
+"let g:airline_theme='dracula'
 "let g:airline_theme='behelit'
 "let g:airline_theme='violet'
 "let g:airline_theme='nord'
@@ -164,65 +152,69 @@ let g:airline#extensions#coc#warning_symbol = '🚬'
 let g:airline#extensions#coc#stl_format_err = '%E{[%e(#%fe)]}'
 let g:airline#extensions#coc#stl_format_warn = '%W{[%w(#%fw)]}'
 
-Plug 'w0rp/ale'
-
-nnoremap <silent> <Leader>at :<C-u>ALEToggle<CR>
-"let g:ale_completion_enabled = 0
-"let g:ale_fix_on_save = 0
-""let g:ale_disable_lsp = 1
-""let g:ale_lint_on_text_changed = 'never'
-""let g:ale_lint_on_enter = 1
-""let g:ale_set_quickfix = 1
-"let g:ale_echo_msg_warning_str = '🚬'
-"let g:ale_echo_msg_error_str = '🔥'
-"let g:ale_sign_warning = '🚬'
-"let g:ale_sign_error = '🔥'
-""let g:ale_sign_style_warning = '🚬'
-""let g:ale_sign_style_error = '🔥'
-""let g:ale_sign_column_always = 1
-"let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+"Plug 'dense-analysis/ale'
+"
+"nnoremap <silent> <Leader>at :<C-u>ALEToggle<CR>
+""let g:ale_completion_enabled = 0
+""let g:ale_fix_on_save = 0
+"""let g:ale_disable_lsp = 1
+"""let g:ale_lint_on_text_changed = 'never'
+"""let g:ale_lint_on_enter = 1
+"""let g:ale_set_quickfix = 1
+""let g:ale_echo_msg_warning_str = '🚬'
+""let g:ale_echo_msg_error_str = '🔥'
+""let g:ale_sign_warning = '🚬'
+""let g:ale_sign_error = '🔥'
+"""let g:ale_sign_style_warning = '🚬'
+"""let g:ale_sign_style_error = '🔥'
+"""let g:ale_sign_column_always = 1
+""let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+""let g:ale_linters = {
+""\   'go': ['golint'],
+""\   'ruby': ['rubocop'],
+""\   'vim': ['vint'],
+""\   'php': ['phpcs'],
+""\   'python': ['pylint'],
+""\   'cpp': ['cppcheck'],
+""\}
+""let g:ale_fixers = {
+""\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+""\   'go': ['gofmt','goimports'],
+""\   'ruby': ['rubocop'],
+""\   'elm': ['elm-format'],
+""\   'javascript': ['eslint'],
+""\   'python': ['autopep8', 'yapf'],
+""\   'rust': ['rustfmt'],
+""\}
 "let g:ale_linters = {
 "\   'go': ['golint'],
-"\   'ruby': ['rubocop'],
-"\   'vim': ['vint'],
-"\   'php': ['phpcs'],
-"\   'python': ['pylint'],
-"\   'cpp': ['cppcheck'],
+"\   'cpp': ['clangd'],
 "\}
 "let g:ale_fixers = {
 "\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-"\   'go': ['gofmt','goimports'],
-"\   'ruby': ['rubocop'],
-"\   'elm': ['elm-format'],
 "\   'javascript': ['eslint'],
-"\   'python': ['autopep8', 'yapf'],
-"\   'rust': ['rustfmt'],
 "\}
-let g:ale_linters = {
-\   'go': ['golint'],
-\}
-let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'javascript': ['eslint'],
-\}
-"let g:ale_statusline_format = ['🚬%d', '🔥%d', 'ok']
-""let g:ale_php_phpcs_standard = 'PSR2'
-""let g:ale_python_pylint_options = '--generate-members'
-"""let g:ale_php_phpcs_use_global = 1
-""let g:ale_c_cppcheck_executable = 'cppcheck'
-""let g:ale_cpp_clang_options = "-std=c++14 -Wall -I/usr/local/eigen/"
-""let g:ale_cpp_gcc_options = "-I/usr/local/eigen"
-""let g:ale_echo_cursor=1
-"
-"
-" for markdown
-augroup ale_custom
-  autocmd!
-  autocmd FileType markdown let g:ale_fix_on_save = 0
-augroup END
+""let g:ale_statusline_format = ['🚬%d', '🔥%d', 'ok']
+"""let g:ale_php_phpcs_standard = 'PSR2'
+"""let g:ale_python_pylint_options = '--generate-members'
+""""let g:ale_php_phpcs_use_global = 1
+"""let g:ale_c_cppcheck_executable = 'cppcheck'
+"let g:ale_cpp_clang_options = "-std=c++14 -Wall -I/usr/local/opt/llvm/include"
+"let g:ale_cpp_clangd_options = "-std=c++14 -Wall -I/usr/local/opt/llvm/include"
+"let g:ale_cpp_gcc_options = "-std=c++14 -Wall -I/usr/local/opt/llvm/include"
+"""let g:ale_echo_cursor=1
+""
+""
+"" for markdown
+"augroup ale_custom
+"  autocmd!
+"  autocmd FileType markdown let g:ale_fix_on_save = 0
+"augroup END
 
 Plug 'dracula/vim', { 'as': 'dracula' }
 let g:dracula_colorterm = 0
+
+Plug 'drewtempelmeyer/palenight.vim'
 
 Plug 'sainnhe/sonokai'
 let g:sonokai_style = 'andromeda'
@@ -254,6 +246,9 @@ if (has("termguicolors"))
     set termguicolors
 endif
 
+Plug 'rakr/vim-one'
+
+Plug 'mhartington/oceanic-next'
 
 Plug 'othree/yajs.vim', {'for': 'javascript'}
 
@@ -305,13 +300,15 @@ Plug 'simeji/winresizer'
 
 Plug 'buoto/gotests-vim'
 
-Plug 'Yggdroot/indentLine'
-let g:indentLine_color_term = 111
-
+Plug 'nathanaelkane/vim-indent-guides'
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_auto_colors = 0
+let g:indent_guides_guide_size = 1
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=#5f005f ctermbg=3
 
 Plug 'andymass/vim-matchup'
 let g:loaded_matchit = 1
-autocmd VimEnter,Colorscheme * :hi MatchWord ctermfg=red guifg=blue cterm=underline gui=underline
+"autocmd VimEnter,Colorscheme * :hi MatchWord ctermfg=red guifg=blue cterm=underline gui=underline
 
 "Plug 'leafgarland/typescript-vim', {'for': 'typescript'}
 
@@ -469,17 +466,21 @@ call plug#end()
 
 
 "color onedark
+color one
 "color dracula
 "color hybrid
 
 "color japanesque
 "color hybrid_material
-color hybrid_reverse
+"color hybrid_reverse
 "colorscheme sonokai
 "color night-owl
 "color nord
 "colorscheme solarized
 "colorscheme NeoSolarized
+"colorscheme OceanicNext
+colorscheme palenight
+"color oreno
 
 
 

@@ -1,14 +1,30 @@
 snippet base "base"
 #include <bits/stdc++.h>
 #define rep(i, n) for (int i = 0; i < (n); i++)
+#define rep1(i, n) for (int i = 1; i <= (n); i++)
 using namespace std;
 typedef long long ll;
 typedef pair<ll, ll> P;
+typedef vector<vector<ll>> Matrix;
+
+const char wall = '#';
+vector<vector<char>> fields;
+vector<vector<bool>> used;
+vector<vector<ll>> dist;
+const int dx[4] = {0, -1, 0, 1};
+const int dy[4] = {1, 0, -1, 0};
+
+vector<ll> A;
+// vectorのリサイズ
+// A.resize(N);
 
 ll gcd(ll a, ll b) { return b?gcd(b,a%b):a;}
-ll lcm(ll a, ll b) { return b/gcd(a,b)*b;}
+ll lcm(ll a, ll b) { return a*b/gcd(a, b);}
 
 int main() {
+	cin.tie(0);
+	ios::sync_with_stdio(false);
+
 	ll n;
 	cin >> n;
 	vector<ll> a(n);
@@ -17,7 +33,8 @@ int main() {
 }
 endsnippet
 
-snippet erast "bool is_prime(int x){.."
+snippet isPrim "bool is_prime(int x){.."
+// O(sqrt(x))
 bool is_prime(int x) {
 	if (x <= 1) {
 		return false;
@@ -53,6 +70,10 @@ do {
 } while (next_permutation(tmp.begin(), tmp.end()));
 endsnippet
 
+snippet cin "cin >> $1 >> endl"
+cin >> $1;
+endsnippet
+
 snippet cout "cout << $1 << endl"
 cout << $1 << endl;
 endsnippet
@@ -62,71 +83,677 @@ sort(h.begin(), h.end(), greater<ll>());
 endsnippet
 
 snippet bfs "bfs with variables"
-#define MAX_N 100
-#define MAX_M 100
-vector<vector<char>> maze(MAX_N, vector<char>(MAX_M + 1));
-int sx, sy; // start point
-int gx, gy; // goal point
-int n, m; //問題の行列
-int dx[4] = {1, 0, -1, 0}, dy[4] = {0, 1, 0, -1};
-const int INF = 100000;
-char wall_char = '#';
-// 最短距離保存テーブル
-vector<vector<int>> d(MAX_N, vector<int>(MAX_M, INF));
-int bfs() {
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < (n); i++)
+using namespace std;
+typedef long long ll;
+typedef pair<ll, ll> P;
+
+const char wall = '#';
+vector<vector<char>> fields;
+vector<vector<bool>> used;
+vector<vector<ll>> dist;
+map<P, P> before;
+vector<P> history;
+
+const int dx[4] = {0, -1, 0, 1};
+const int dy[4] = {1, 0, -1, 0};
+
+ll H, W;
+vector<ll> A;
+
+ll gcd(ll a, ll b) { return b?gcd(b,a%b):a;}
+ll lcm(ll a, ll b) { return b/gcd(a,b)*b;}
+
+bool bfs() {
   queue<P> que;
-  que.push(P(sx, sy));
-  d[sx][sy] = 0;
+  used[0][0] = true;
+  que.push(make_pair(0, 0));
+  //dist[0][0] = 0;
 
-  while(que.size()) {
+  while (que.size() > 0) {
     P p = que.front(); que.pop();
-    if (p.first == gx && p.second == gy) break;
-
+    ll x = p.second; ll y = p.first;
     rep(i, 4) {
-      int nx = p.first + dx[i], ny = p.second + dy[i];
-
-      if (0 < nx && nx < n && 0 <= ny && ny < m && maze[nx][ny] != wall_char && d[nx][ny] == INF) {
-        que.push(P(nx, ny));
-        d[nx][ny] = d[p.first][p.second] + 1;
-        printf("d[%d][%d] = %d\n", nx, ny, d[nx][ny]);
+      ll X = x+dx[i];
+      ll Y = y+dy[i];
+      if (X < 0 | X >= W | Y < 0 | Y >= H) continue;
+      if (fields[Y][X] == wall) continue;
+      if (used[Y][X]) continue;
+      que.push(make_pair(Y, X));
+      // 履歴管理
+      before[make_pair(Y,X)] = p;
+      // 距離は 今+1
+      //dist[Y][X] = dist[y][x] + 1;
+      used[Y][X] = true;
+      if (Y == H-1 && X == W-1) {
+        P current = make_pair(Y,X);
+        // ゴールまでついたらゴールまでの履歴をたどる
+        while (!(current.second == 0 && current.first == 0)) {
+          history.push_back(current);
+          current = before[current];
+        }
+        history.push_back(current);
+        return true;
       }
     }
-    //if (que.size() > 1) {
-    //  rep(i, que.size()) {
-    //    P hoge = que.front(); que.pop();
-    //    cout << hoge.first << " " << hoge.second << endl;
-    //  }
-    //  return 0;
-    //}
   }
-  return d[gx][gy];
+  return false;
 }
 endsnippet
 
 snippet dfs "dfs with variables"
-#define MAX_N 100
-#define MAX_M 100
-int W, H;
-char wall_char = 'W';
-vector<vector<char>> field(MAX_N, vector<char>(MAX_M));
-vector<vector<bool>> reached(MAX_N, vector<bool>(MAX_M));
+#include <iostream>
+#include <vector>
+using namespace std;
+using Graph = vector<vector<int>>;
 
-void dfs(int x, int y) {
-  // 外側か壁の場合は何もしない
-  if (x < 0 || W <= x || y < 0 || H <= y || field[x][y] == wall_char ) return;
+// 深さ優先探索
+vector<bool> seen;
+void dfs(const Graph &G, int v) {
+    seen[v] = true; // v を訪問済にする
 
-  // 以前に到達していたら何もしない
-  if (reached[x][y]) return;
+    // v から行ける各頂点 next_v について
+    for (auto next_v : G[v]) { 
+        if (seen[next_v]) continue; // next_v が探索済だったらスルー
+        dfs(G, next_v); // 再帰的に探索
+    }
+}
 
-  reached[x][y] = true; //到達したよ
+int main() {
+    // 頂点数と辺数
+    int N, M; cin >> N >> M;
 
-  dfs(x+1, y); //右
-  dfs(x-1, y); //左
-  dfs(x, y+1); //下
-  dfs(x, y-1); //上
+    // グラフ入力受取 (ここでは無向グラフを想定)
+    Graph G(N);
+    for (int i = 0; i < M; ++i) {
+        int a, b;
+        cin >> a >> b;
+        G[a].push_back(b);
+        G[b].push_back(a);
+    }
+
+    // 頂点 0 をスタートとした探索
+    seen.assign(N, false); // 全頂点を「未訪問」に初期化
+    dfs(G, 0);
 }
 endsnippet
 
 snippet tajigen "多次元vector"
 vector<vector<ll>> hoge(h, vector<ll>(w));
+endsnippet
+
+snippet permutation "順列全探索"
+rep(i, n) v[i] = i+1;
+do {
+} while(next_permutation(v.begin(), v.end()));//順列全探索
+endsnippet
+
+snippet binary "二分探索"
+const int N = 100000;
+vector<ll> a(N);
+// index が条件を満たすかどうか
+bool isOK(int index, int key) {
+    if (a[index] >= key) return true;
+    else return false;
+}
+
+// 汎用的な二分探索のテンプレ
+// 完全一致フラフをtrueにすると求めるkeyがaに存在しないとき -1 を返す
+int binary_search(int key, bool kanzen) {
+    int ng = -1; //「index = 0」が条件を満たすこともあるので、初期値は -1
+    int ok = (int)a.size(); // 「index = a.size()-1」が条件を満たさないこともあるので、初期値は a.size()
+
+    /* ok と ng のどちらが大きいかわからないことを考慮 */
+    while (abs(ok - ng) > 1) {
+        int mid = (ok + ng) / 2;
+
+        if (isOK(mid, key)) ok = mid;
+        else ng = mid;
+    }
+    if (kanzen && a[ok] != key) {
+      ok = -1;
+    }
+    return ok;
+}
+endsnippet
+
+snippet mint "自動でmodとってくれるライブラリ"
+
+// auto mod int
+// https://youtu.be/L8grWxBlIZ4?t=9858
+// https://youtu.be/ERZuLAxZffQ?t=4807 : optimize
+// https://youtu.be/8uowVvQ_-Mo?t=1329 : division
+const int mod = 1000000007;
+struct mint {
+  ll x; // typedef long long ll;
+  mint(ll x=0):x((x%mod+mod)%mod){}
+  mint operator-() const { return mint(-x);}
+  mint& operator+=(const mint a) {
+    if ((x += a.x) >= mod) x -= mod;
+    return *this;
+  }
+  mint& operator-=(const mint a) {
+    if ((x += mod-a.x) >= mod) x -= mod;
+    return *this;
+  }
+  mint& operator*=(const mint a) { (x *= a.x) %= mod; return *this;}
+  mint operator+(const mint a) const { return mint(*this) += a;}
+  mint operator-(const mint a) const { return mint(*this) -= a;}
+  mint operator*(const mint a) const { return mint(*this) *= a;}
+  mint pow(ll t) const {
+    if (!t) return 1;
+    mint a = pow(t>>1);
+    a *= a;
+    if (t&1) a *= *this;
+    return a;
+  }
+
+  // for prime mod
+  mint inv() const { return pow(mod-2);}
+  mint& operator/=(const mint a) { return *this *= a.inv();}
+  mint operator/(const mint a) const { return mint(*this) /= a;}
+};
+istream& operator>>(istream& is, const mint& a) { return is >> a.x;}
+ostream& operator<<(ostream& os, const mint& a) { return os << a.x;}
+endsnippet
+
+snippet fact "階乗"
+mint factrial(int n) {
+  if (n == 0) return 1;
+  mint x = factrial(n/2);
+  x *= x;
+  if (n%2 == 1) x *= 2;
+  return x;
+}
+endsnippet
+
+snippet combi "組み合わせ"
+mint choose(int n, int a) {
+  mint x = 1, y = 1;
+  rep(i, a) {
+    x *= n-i;
+    y *= i+1;
+  }
+  return x / y;
+}
+endsnippet
+
+snippet dcout "小数点を正確に出力"
+// 桁数と変数名を指定
+//cout << fixed << setprecision(6) << ans << endl;
+cout << fixed << setprecision($1) << $2 << endl;
+endsnippet
+
+snippet fastpow "高速pow(繰り返し二乗法)"
+long long fastpow(long long x, long long n) {
+    long long ret = 1;
+    while (n > 0) {
+        if (n & 1) ret *= x;  // n の最下位bitが 1 ならば x^(2^i) をかける
+        x *= x;
+        n >>= 1;  // n を1bit 左にずらす
+    }
+    return ret;
+}
+endsnippet
+
+snippet fastpowWithMod "Mod取りながら高速pow(繰り返し二乗法)"
+const int MOD = 1000000007;
+ 
+long long fastpow(long long x, long long n) {
+    long long ret = 1;
+    while (n > 0) {
+        if (n & 1) ret = ret * x % MOD;  // n の最下位bitが 1 ならば x^(2^i) をかける
+        x = x * x % MOD;
+        n >>= 1;  // n を1bit 左にずらす
+    }
+    return ret;
+}
+endsnippet
+
+
+snippet factorize "素因数分解"
+// firstに素数, secondに何乗かが入る
+vector<pair<ll, ll>> factorize(ll n) {
+  vector<pair<ll, ll>> res;
+  for (ll i = 2; i * i <= n; ++i) {
+    if (n%i) continue;
+    res.emplace_back(i, 0);
+    while (n%i == 0) {
+      n /= i;
+      res.back().second++;
+    }
+  }
+  if ( n != 1) res.emplace_back(n, 1);
+  return res;
+}
+endsnippet
+
+snippet erast "素数列挙(エラトステネスの篩)"
+// O(NloglogN)
+std::vector<int> Eratosthenes( const int N )
+{
+    std::vector<bool> is_prime( N + 1 );
+    for( int i = 0; i <= N; i++ )
+    {
+        is_prime[ i ] = true;
+    }
+    std::vector<int> P;
+    for( int i = 2; i <= N; i++ )
+    {
+        if( is_prime[ i ] )
+        {
+            for( int j = 2 * i; j <= N; j += i )
+            {
+                is_prime[ j ] = false;
+            }
+            P.emplace_back( i );
+        }
+    }
+    return P;
+}
+endsnippet
+
+snippet oneline "一行で出力するやつ"
+rep(i,$1) {
+  printf("%lld%c", $2[i], (i == $1-1)?'\n':' ');
+}
+endsnippet
+
+snippet ranlength "ランレングス圧縮"
+/**
+ * ランレングス圧縮
+ */
+vector<pair<char, ll>> RLE(const string &S) {
+    ll cnt = 0;
+    vector<pair<char, ll>> res;
+    for (ll i = 0; i < (ll) S.size(); i++) {
+        cnt++;
+        if (i == (ll) S.size() - 1) {
+            res.emplace_back(S[i], cnt);
+            break;
+        }
+        if (S[i] != S[i + 1]) {
+            res.emplace_back(S[i], cnt);
+            cnt = 0;
+        }
+    }
+    return res;
+}
+endsnippet
+
+snippet bitallsearch "ビット全探索"
+int N;	// 状態を持つ対象の数
+for(int bit=0; bit<(1<<N); ++bit) {
+    for(int i=0; i<N; i++) {
+    	if(bit & 1<<i) {
+        	// ここに bitが1の時、つまり組み合わせに含む場合の処理を書く.
+        }
+    }
+}
+endsnippet
+
+snippet unionFind "union find"
+// UnionFind
+// coding: https://youtu.be/TdR816rqc3s?t=726
+// comment: https://youtu.be/TdR816rqc3s?t=6822
+// UnionFind uf(n) で初期化
+struct UnionFind {
+  vector<int> d;
+  UnionFind(int n=0): d(n,-1) {}
+  int find(int x) {
+    if (d[x] < 0) return x;
+    return d[x] = find(d[x]);
+  }
+  // 木を作る動作 O(α(n)) < O(logn)
+  bool unite(int x, int y) {
+    x = find(x); y = find(y);
+    if (x == y) return false;
+    if (d[x] > d[y]) swap(x,y);
+    d[x] += d[y];
+    d[y] = x;
+    return true;
+  }
+  // xとyが同じ連結成分であるか O(α(n)) < O(logn)
+  bool same(int x, int y) { return find(x) == find(y);}
+  int size(int x) { return -d[find(x)];}
+};
+endsnippet
+
+snippet spf "素因数分解爆速"
+/*  PrimeFact
+    init(N): 初期化。O(N log log N)
+    get(n): クエリ。素因数分解を求める。O(log n)
+ */
+template <typename T>
+struct PrimeFact {
+    vector<T> spf;
+    PrimeFact(T N) { init(N); }
+    void init(T N) { // 前処理。spf を求める
+        spf.assign(N + 1, 0);
+        for (T i = 0; i <= N; i++) spf[i] = i;
+        for (T i = 2; i * i <= N; i++) {
+            if (spf[i] == i) {
+                for (T j = i * i; j <= N; j += i) {
+                    if (spf[j] == j) {
+                        spf[j] = i;
+                    }
+                }
+            }
+        }
+    }
+    map<T, T> get(T n) { // nの素因数分解を求める
+        map<T, T> m;
+        while (n != 1) {
+            m[spf[n]]++;
+            n /= spf[n];
+        }
+        return m;
+    }
+};
+endsnippet
+
+snippet graph "ダイクストラ or ベルマンフォード"
+struct edge {
+  long long to;
+  long long cost;
+};
+
+const ll INF = 100000000;
+struct Graph {
+  ll V;
+  vector<vector<edge>> G;
+  vector<ll> dist;
+  // prev[to] = from
+  // to に到達前にfromにいたよ
+  vector<ll> prev;
+ 
+  // construct
+  //
+  // usage: graph g(n);
+  Graph(ll n) {
+    init(n);
+  }
+
+  void init(ll n) {
+    V = n;
+    G.resize(V);
+    dist.resize(V, INF);
+    prev.resize(V, -1);
+  }
+
+  // 頂点sから頂点tへコストcostの辺が張られる
+  void add_edge(ll s, ll t, ll cost) {
+    edge e;
+    e.to = t; e.cost = cost;
+    G[s].push_back(e);
+  }
+
+  // 頂点sから各頂点への最短経路をダイクストラ法で探索
+  // debug = true でデバッグ出力する
+  //
+  // コストが負の辺があると使えないから注意
+  //
+  // 頂点iへの距離は ll dist = d.dist[i]
+  //
+  // O(E + VlogV)
+  void dijkstra(ll s, bool debug) {
+    dist[s] = 0;
+    priority_queue<P, vector<P>, greater<P>> que;
+    que.push(P(0, s));
+    while(!que.empty()) {
+      P p = que.top(); que.pop();
+      ll v = p.second;
+      if (debug) printf("v: %lld, dist[v]: %lld, cost: %lld\n", v, dist[v], p.first);
+      if (dist[v]<p.first) {
+        if (debug) printf("v: %lld, dist[v]: %lld, p.first: %lld skip", v, dist[v], p.first);
+        continue;
+      }
+      for (auto nextE : G[v]) {
+        if (dist[nextE.to] > dist[v] + nextE.cost) {
+          if (debug) printf("v: %lld, next: %lld\n", v, nextE.to);
+          dist[nextE.to] = dist[v] + nextE.cost;
+          prev[nextE.to] = v;
+          que.push(P(dist[nextE.to], nextE.to));
+        }
+      }
+    }
+  }
+
+  // 頂点sから各頂点への最短経路をベルマンフォード法で探索
+  //
+  // 戻り値がtrueならば負の閉路を含む
+  bool bellman_ford(int s) {
+    dist[s] = 0;
+    rep(i, V) {
+      rep(v, V) {
+        rep(k, G[v].size()) {
+          edge e = G[v][k];
+          if (dist[v] != INF && dist[e.to] > dist[v] + e.cost) {
+            dist[e.to] = dist[v] + e.cost;
+            if ( i == V - 1 ) return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  // 頂点tまでの経路を返す
+  // ダイクストラ法で探索した場合のみ使える
+  vector<ll> get_path(ll t) {
+    vector<ll> path;
+    for (ll cur = t; cur != -1; cur = prev[cur]) {
+      path.push_back(cur);
+    }
+    reverse(path.begin(), path.end());
+    return path;
+  }
+
+};
+
+
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+
+  ll n, m;
+  cin >> n >> m;
+  vector<ll> a(n);
+  Graph g(n);
+  rep(i, m) {
+    ll a, b, c;
+    cin >> a >> b >> c;
+    g.add_edge(a, b, c);
+  }
+  g.bellman_ford(0);
+  rep(i, n) {
+  	// unreachable のときは INFが入っている
+	// unreachableの考慮を忘れないこと
+    cout << i << ", " << g.dist[i] <<  endl;
+  }
+  //rep(i, n) {
+  //  cout << i << ", " << g.dist[i] << ", "  << g.prev[i]<<  endl;
+  //}
+  // // ダイクストラのときは最短経路わかる
+  //vector<ll> path = g.get_path(1);
+  //rep(i, path.size()) cout << path[i] << endl;
+  return 0;
+}
+endsnippet
+
+snippet warshall "ワーシャルフロイド法"
+const ll INF = 100000000;
+struct Graph {
+  Matrix d; // グラフの距離を格納した隣接行列
+            // d[u][v]は辺e=(u, v)のコスト
+            // 存在しない場合はINF
+            // ただし d[i][i] = 0
+  ll V;
+
+  Graph(ll n) {
+    init(n);
+  }
+
+  void init(ll n) {
+    V = n;
+    d = Matrix(V, vector<ll>(V, INF));
+    rep(i, n) d[i][i] = 0;
+  }
+
+  void add_dist_information(ll u, ll v, ll cost) {
+    d[u][v] = cost;
+  }
+
+  void warshall_floyd() {
+    rep(i, V) { // 経由する頂点
+      rep(j, V) { // 開始頂点
+        rep(k, V) { // 終端
+          d[j][k] = min(d[j][k], d[j][i] + d[i][k]);
+        }
+      }
+    }
+  }
+};
+
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+
+  ll n, m;
+  cin >> n >> m;
+
+  Graph g(n);
+
+  rep(i, m) {
+    int from, to, cost;
+    cin >> from >> to >> cost;
+    g.add_dist_information(from, to, cost);
+  }
+  g.warshall_floyd();
+
+  rep(i, n) {
+    rep(j, n) {
+      if (i != j && g.d[i][j] != INF) {
+        cout << i << "to "<< j << ": "<< g.d[i][j] << endl;
+      }
+    }
+  }
+
+  return 0;
+}
+endsnippet
+
+snippet kruskal "クラスカル法（最小全域木のコスト)"
+
+// UnionFind
+// coding: https://youtu.be/TdR816rqc3s?t=726
+// comment: https://youtu.be/TdR816rqc3s?t=6822
+// UnionFind uf(n) で初期化
+struct UnionFind {
+  vector<int> d;
+  UnionFind(int n=0): d(n,-1) {}
+  int find(int x) {
+    if (d[x] < 0) return x;
+    return d[x] = find(d[x]);
+  }
+  // 木を作る動作 O(α(n)) < O(logn)
+  bool unite(int x, int y) {
+    x = find(x); y = find(y);
+    if (x == y) return false;
+    if (d[x] > d[y]) swap(x,y);
+    d[x] += d[y];
+    d[y] = x;
+    return true;
+  }
+  // xとyが同じ連結成分であるか O(α(n)) < O(logn)
+  bool same(int x, int y) { return find(x) == find(y);}
+  int size(int x) { return -d[find(x)];}
+};
+
+struct edge {
+  ll from, to, cost;
+
+  // コストの大小で順序定義
+  bool operator<(const edge& o) const {
+    return cost < o.cost;
+  }
+};
+
+struct Graph {
+  ll V; // 頂点数
+  vector<edge> es; //辺集合
+
+  Graph(ll n) {
+    V = n;
+  }
+
+  void add_edge(ll from, ll to, ll cost) {
+    edge e = {from, to, cost};
+    es.push_back(e);
+  }
+  
+  int kruskal() {
+    // 貪欲法に近いイメージ
+    // コストが小さい順にソートする
+    sort(es.begin(), es.end());
+    UnionFind uf(V);
+    ll min_cost = 0;
+
+    rep(ei, es.size()) {
+      edge& e = es[ei];
+      // コストが小さい順に
+      // 木の構成要素として決定する
+      //
+      // ただし uf.same となるときは閉路ができることを示す
+      if (!uf.same(e.from, e.to)) {
+        min_cost += e.cost;
+        uf.unite(e.from, e.to);
+      }
+    }
+
+    return min_cost;
+  }
+
+};
+
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+
+  ll n, m; // n頂点 m辺
+  cin >> n >> m;
+  Graph g(n);
+  rep(i, m) {
+    int from, to, cost;
+    cin >> from >> to >> cost;
+    // from, to は 0オリジン想定
+    // 違うときはデクリメントしろ
+    g.add_edge(from, to, cost);
+  }
+  cout << g.kruskal() << endl;
+  return 0;
+}
+endsnippet
+
+snippet iterCombi "組み合わせ列挙"
+// 最初の1文字目は変わらないからfor分で回して呼び出して
+// rep(i, n) iterCombi(vector<int>(1, i), 5, 3, false);
+//
+// nCk を列挙するもの
+// dup = true で重複組合せを許可する
+void iterCombi(vector<int> v, int n, int k, bool dup) {
+  if(v.size() == k) {
+    rep(i,k) {
+      printf("%d%c", v[i], (i == k-1)?'\n':' ');
+    }
+    return;
+  }
+  if (dup) v.push_back(v.back());
+  else v.push_back(v.back()+1);
+  while(v.back() < n) {
+    iterCombi(v, n, k, dup); // A = {1} から A={1, 1} になる. 長さを増やすため
+    v.back()++; //次にA={1} から A = {2}でdfs走る. 数値を増やすため
+  }
+}
 endsnippet

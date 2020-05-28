@@ -1,6 +1,3 @@
-if [ "$(uname)" == 'Darwin' ]; then
-    mac
-fi
 
 mac() {
     if !(type "brew" > /dev/null 2>&1); then
@@ -16,10 +13,9 @@ mac() {
     curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     
-    cd
     
     if [ ! -e $HOME/dotfiles ]; then
-    	git clone https://github.com/bookun/dotfiles.git
+    	git clone https://github.com/bookun/dotfiles.git ~/dotfiles
     fi
     
     if [ -e $HOME/.tmux.conf ]; then
@@ -40,3 +36,6 @@ mac() {
     ln -s dotfiles/tmux/.tmux.conf $HOME/.tmux.conf
     ln -s dotfiles/nvim/init.vim $HOME/.config/nvim/init.vim
 }
+if [ "$(uname)" == 'Darwin' ]; then
+    mac
+fi

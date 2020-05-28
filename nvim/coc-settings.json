@@ -1,27 +1,29 @@
 {
-    "python.jediEnabled": false,
-    "eslint.filetypes" : ["javascript, typescript, vue"],
+	"list.insertMappings": {
+		"<C-r>": "do:refresh",
+		"<C-f>": "feedkeys:\\<C-f>",
+		"<C-b>": "feedkeys:\\<C-b>",
+		"<C-n>": "normal:j",
+		"<C-p>": "normal:k",
+		"<C-s>": "action:split",
+		"<C-v>": "action:vsplit",
+		"<C-t>": "action:tabe"
+	},
+    "list.source.mru.excludePatterns": [
+        "**/.git/*",
+        "/tmp/*",
+        "**/vendor/*"
+    ],
+    "list.source.grep.excludePatterns": [
+        "**/.git/*",
+        "/tmp/*",
+        "**/vendor/*"
+    ],
     "eslint.autoFixOnSave": true,
+    "eslint.autoFix":true,
+    "eslint.run":"onType",
+    "python.jediEnabled": false,
     "languageserver": {
-     "golang": {
-       "command": "gopls",
-       "rootPatterns": ["go.mod"],
-       "disableWorkspaceFolders": true,
-       "filetypes": ["go"],
-       },
-      "rust": {
-        "command": "rust-analyzer",
-        "filetypes": ["rust"],
-        "rootPatterns": ["Cargo.toml"]
-      },
-      "intelephense": {
-        "command": "intelephense",
-        "args": ["--stdio"],
-        "filetypes": ["php"],
-        "initializationOptions": {
-            "storagePath": "/tmp/intelephense"
-        }
-      },
       "dockerfile": {
         "command": "docker-langserver",
         "filetypes": ["dockerfile"],
@@ -33,14 +35,41 @@
       	"filetypes": ["sh"],
       	"ignoredRootPaths": ["~"]
       },
-      "clangd": {
-      	"command": "clangd",
-      	"rootPatterns": ["compile_flags.txt", "compile_commands.json", ".git"],
-      	"filetypes": ["c", "cpp", "objc", "objcpp"]
-      },
       "vls": {
         "command": "vls",
         "filetypes": ["vue"]
       },
+      "terraform": {
+        "command": "terraform-lsp",
+        "filetypes": ["tf"],
+        "initializationOptions": {}
+      }
+    },
+    "suggest.completionItemKindLabels": {
+        "function": "\uf794",
+        "method": "\uf6a6",
+        "variable": "\uf219",
+        "constant": "\uf8ff",
+        "struct": "\ufb44",
+        "class": "\uf0e8",
+        "interface": "\ufa52",
+        "text": "\ue612",
+        "enum": "\uf435",
+        "enumMember": "\uf02b",
+        "module": "\uf668",
+        "color": "\ue22b",
+        "property": "\ufab6",
+        "field": "\uf93d",
+        "unit": "\uf475",
+        "file": "\uf471",
+        "value": "\uf8a3",
+        "event": "\ufacd",
+        "folder": "\uf115",
+        "keyword": "\uf893",
+        "snippet": "\uf64d",
+        "operator": "\uf915",
+        "reference": "\uf87a",
+        "typeParameter": "\uf278",
+        "default": "\uf11b"
     }
 }
