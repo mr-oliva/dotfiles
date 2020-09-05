@@ -3,8 +3,15 @@ alacritty
 alfred
 clipy
 discord
-firefox-developer-edition
-firefox-nightly
+docker
+firefox
+font-hackgen
+gitify
+iterm2
+macvim
 microsoft-teams
+ngrok
 postman
+slack
+visual-studio-code
 wireshark
