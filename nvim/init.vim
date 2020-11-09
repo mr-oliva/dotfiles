@@ -11,12 +11,16 @@ set hidden
 set updatetime=300
 set background=dark
 "set cursorline
+set completeopt=menuone,noinsert,noselect
+set shortmess+=c
+set diffopt+=vertical
+setlocal nomodeline
 
-syntax on
+syntax enable
 
 tnoremap <C-[> <C-\><C-n>
 
-"set termguicolors
+set termguicolors
 let g:python3_host_prog = "/usr/local/bin/python3"
 if has("autocmd")
     filetype plugin on
@@ -30,37 +34,46 @@ if has("autocmd")
     autocmd FileType yaml setlocal et sw=2 sts=2 ts=2
 endif
 
-autocmd ColorScheme * highlight CocHighlightText guibg=Green ctermbg=11
-autocmd FileType !python highlight CocHighlightText guibg=Green ctermbg=11
+"autocmd ColorScheme * highlight CocHighlightText guibg=Green ctermbg=11
+"autocmd FileType !python highlight CocHighlightText guibg=Green ctermbg=11
 
 call plug#begin('~/.local/share/nvim/plugged')
 
+Plug 'mattn/vim-maketable'
+
+Plug 'cappyzawa/trim.nvim'
+
 Plug 'jparise/vim-graphql'
 
-Plug 'ntpeters/vim-better-whitespace'
-let g:better_whitespace_enabled=1
-let g:strip_whitespace_on_save=1
+"Plug 'ntpeters/vim-better-whitespace'
+"let g:better_whitespace_enabled=1
+"let g:strip_whitespace_on_save=1
+Plug 'lambdalisue/gina.vim'
+Plug 'junkblocker/patchreview-vim'
 
 Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'romgrk/nvim-treesitter-context'
 
 Plug 'morhetz/gruvbox'
-let g:gruvbox_contrast_dark = 'soft'
+"let g:gruvbox_contrast_dark = 'soft'
+"let g:gruvbox_contrast_dark = 'hard'
+"
+Plug 'ghifarit53/tokyonight-vim'
+let g:tokyonight_style = 'night' " available: night, storm
+"let g:tokyonight_enable_italic = 1
 
 Plug 'liuchengxu/vista.vim'
 map <silent>tg :Vista coc<CR>
 let g:vista#renderer#inable_icon = 1
-function! NearestMethodOrFunction() abort
-  return get(b:, 'vista_nearest_method_or_function', '')
-endfunction
+let g:vista_default_executive = "coc"
+let g:vista#renderer#enable_icon = 1
 
-set statusline+=%{NearestMethodOrFunction()}
+
 
 "Plug 'cocopon/iceberg.vim'
 "Plug 'patstockwell/vim-monokai-tasty'
 "Plug 'jacoborus/tender.vim'
 "Plug 'sainnhe/gruvbox-material'
-Plug 'dracula/vim', { 'as': 'dracula' }
-"let g:dracula_colorterm = 0
 "Plug 'rakr/vim-one'
 "Plug 'altercation/vim-colors-solarized'
 "let g:solarized_termcolors=256
@@ -78,7 +91,7 @@ Plug 'dracula/vim', { 'as': 'dracula' }
 ""let g:material_theme_style = 'palenight'
 "let g:material_theme_style = 'default'
 "let g:material_terminal_italics = 1
-"Plug 'sonph/onehalf', {'rtp': 'vim/'}
+Plug 'sonph/onehalf', {'rtp': 'vim/'}
 "Plug 'arcticicestudio/nord-vim'
 "Plug 'sainnhe/sonokai'
 "let g:sonokai_style = 'andromeda'
@@ -95,9 +108,10 @@ let g:spring_night_cterm_italic = 1
 "let g:neodark#use_256color = 1
 
 
-"Plug 'ryanoasis/vim-devicons'
-"let g:webdevicons_enable_airline_statusline = 1
-"let g:webdevicons_enable_airline_tabline = 1
+Plug 'ryanoasis/vim-devicons'
+let g:webdevicons_enable_airline_statusline = 1
+let g:webdevicons_enable_airline_tabline = 1
+"Plug 'adelarsq/vim-devicons-emoji'
 
 "Plug 'pangloss/vim-javascript'
 "Plug 'HerringtonDarkholme/yats.vim'
@@ -127,17 +141,24 @@ let g:fzf_action = {
   \ 'ctrl-x': 'split',
   \ 'ctrl-v': 'vsplit' }
 let g:fzf_buffers_jump = 1
-nnoremap <silent> ,f :GFiles<CR>
+let g:fzf_preview_window = 'right:60%'
+nnoremap <silent> ,f :Files<CR>
+nnoremap <silent> ,gf :GFiles<CR>
 nnoremap <silent> ,F :GFiles?<CR>
 nnoremap <silent> ,b :Buffers<CR>
 nnoremap <silent> ,l :BLines<CR>
 nnoremap <silent> ,h :History<CR>
 nnoremap <silent> ,m :Mark<CR>
 nnoremap <silent> ,r :Rg<CR>
-command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
+"command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
+command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, fzf#vim#with_preview(), <bang>0)
+
+"Plug 'neovim/nvim-lspconfig'
+"Plug 'nvim-lua/completion-nvim'
+"Plug 'nvim-lua/diagnostic-nvim'
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-command! -nargs=0 Format :call CocAction('format')
+"command! -nargs=0 Format :call CocAction('format')
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 inoremap <silent><expr> <c-space> coc#refresh()
 " Remap keys for gotos
@@ -155,8 +176,12 @@ set signcolumn=yes
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
+nmap <silent> gs <Plug>(coc-git-chunkinfo)
+
+set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
 " Add `:OR` command for organize imports of the current buffer.
-command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
+"command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
 "
 " Use K to show documentation in preview window.
 nnoremap <silent> K :call <SID>show_documentation()<CR>
@@ -165,11 +190,11 @@ function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
     execute 'h '.expand('<cword>')
   else
-    call CocAction('doHover')
+    call CocActionAsync('doHover')
   endif
 endfunction
 
-autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+"autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
 augroup mygroup
   autocmd!
   " Setup formatexpr specified filetype(s).
@@ -179,7 +204,9 @@ augroup mygroup
 augroup end
 
 " Highlight symbol under cursor on CursorHold
-:"autocmd CursorHold * silent call CocActionAsync('highlight')
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+"nnoremap mdf :call coc#config('git', {'diffRevision': 'master'})<CR>
 
 
 "Plug 'prabirshrestha/vim-lsp'
@@ -200,6 +227,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+let g:airline_powerline_fonts = 1
 
 "let g:airline_theme='onedark'
 "let g:airline_theme='one'
@@ -210,7 +238,8 @@ let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
 "let g:airline_theme='behelit'
 "let g:airline_theme='violet'
 "let g:airline_theme='nord'
-let g:airline_theme='gruvbox'
+"let g:airline_theme='gruvbox'
+let g:airline_theme='tokyonight'
 "let g:airline_theme='solarized'
 "let g:airline_theme='srcery'
 "let g:airline_theme='onehalfdark'
@@ -218,91 +247,35 @@ let g:airline_theme='gruvbox'
 "let g:airline_theme='spring_night'
 "let g:airline_theme='monokai_tasty'
 
-
-" ale
-"let g:airline#extensions#ale#enabled = 1
-"let g:airline#extensions#ale#error_symbol = '🔥'
-"let g:airline#extensions#ale#warning_symbol = '🚬'
-"
 " coc側でdiagnosticする場合は必要
 let g:airline_section_info = '%{airline#util#wrap(airline#extensions#coc#get_info(),0)}'
 let g:airline_section_error = '%{airline#util#wrap(airline#extensions#coc#get_error(),0)}'
 let g:airline_section_warning = '%{airline#util#wrap(airline#extensions#coc#get_warning(),0)}'
 let g:airline_section_hint = '%{airline#util#wrap(airline#extensions#coc#get_hint(),0)}'
-
+let g:airline#extensions#coc#enabled = 1
 let g:airline#extensions#coc#error_symbol = '🔥'
 let g:airline#extensions#coc#warning_symbol = '🚬'
 let g:airline#extensions#coc#stl_format_err = '%E{[%e(#%fe)]}'
 let g:airline#extensions#coc#stl_format_warn = '%W{[%w(#%fw)]}'
 let g:airline#extensions#vista#enabled = 1
 
-"Plug 'dense-analysis/ale'
-"
-"nnoremap <silent> <Leader>at :<C-u>ALEToggle<CR>
-""let g:ale_completion_enabled = 0
-""let g:ale_fix_on_save = 0
-"""let g:ale_disable_lsp = 1
-"""let g:ale_lint_on_text_changed = 'never'
-"""let g:ale_lint_on_enter = 1
-"""let g:ale_set_quickfix = 1
-""let g:ale_echo_msg_warning_str = '🚬'
-""let g:ale_echo_msg_error_str = '🔥'
-""let g:ale_sign_warning = '🚬'
-""let g:ale_sign_error = '🔥'
-"""let g:ale_sign_style_warning = '🚬'
-"""let g:ale_sign_style_error = '🔥'
-"""let g:ale_sign_column_always = 1
-""let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
-""let g:ale_linters = {
-""\   'go': ['golint'],
-""\   'ruby': ['rubocop'],
-""\   'vim': ['vint'],
-""\   'php': ['phpcs'],
-""\   'python': ['pylint'],
-""\   'cpp': ['cppcheck'],
-""\}
-""let g:ale_fixers = {
-""\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-""\   'go': ['gofmt','goimports'],
-""\   'ruby': ['rubocop'],
-""\   'elm': ['elm-format'],
-""\   'javascript': ['eslint'],
-""\   'python': ['autopep8', 'yapf'],
-""\   'rust': ['rustfmt'],
-""\}
-"let g:ale_linters = {
-"\   'go': ['golint'],
-"\   'cpp': ['clangd'],
-"\}
-"let g:ale_fixers = {
-"\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-"\   'javascript': ['eslint'],
-"\}
-""let g:ale_statusline_format = ['🚬%d', '🔥%d', 'ok']
-"""let g:ale_php_phpcs_standard = 'PSR2'
-"""let g:ale_python_pylint_options = '--generate-members'
-""""let g:ale_php_phpcs_use_global = 1
-"""let g:ale_c_cppcheck_executable = 'cppcheck'
-"let g:ale_cpp_clang_options = "-std=c++14 -Wall -I/usr/local/opt/llvm/include"
-"let g:ale_cpp_clangd_options = "-std=c++14 -Wall -I/usr/local/opt/llvm/include"
-"let g:ale_cpp_gcc_options = "-std=c++14 -Wall -I/usr/local/opt/llvm/include"
-"""let g:ale_echo_cursor=1
-""
-""
-"" for markdown
-"augroup ale_custom
-"  autocmd!
-"  autocmd FileType markdown let g:ale_fix_on_save = 0
-"augroup END
+"Plug 'itchyny/lightline.vim'
+"let g:lightline = {
+"      \ 'colorscheme': 'wombat',
+"      \ 'active': {
+"      \   'left': [ [ 'mode', 'paste' ],
+"      \             [ 'readonly', 'filename', 'modified', 'method' ] ]
+"      \ },
+"      \ 'component_function': {
+"      \   'method': 'NearestMethodOrFunction'
+"      \ },
+"      \ }
+"function! NearestMethodOrFunction() abort
+"  return get(b:, 'vista_nearest_method_or_function', '')
+"endfunction
 
-
-"Plug 'drewtempelmeyer/palenight.vim'
-"
-"Plug 'haishanh/night-owl.vim'
-"
-""Plug 'aereal/vim-colors-japanesque'
-"
 Plug 'joshdick/onedark.vim'
+let g:onedark_termcolors=256
 let g:onedark_terminal_italics=1
 if (has("termguicolors"))
     set termguicolors
@@ -326,24 +299,24 @@ let g:mkdp_page_title = '「${name}」'
 " autocmd FileType markdown nnoremap <LEADER>p :MarkdownPreview<CR>
 "
 
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
-" Trigger configuration. Do not use <tab> if you use
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<c-l>"
-let g:UltiSnipsJumpBackwardTrigger="<c-h>"
-let g:UltiSnipsSnippetDirectories=['~/.config/nvim/Ultisnips/']
+"Plug 'SirVer/ultisnips'
+"Plug 'honza/vim-snippets'
+"" Trigger configuration. Do not use <tab> if you use
+"let g:UltiSnipsExpandTrigger="<tab>"
+"let g:UltiSnipsJumpForwardTrigger="<c-l>"
+"let g:UltiSnipsJumpBackwardTrigger="<c-h>"
+"let g:UltiSnipsSnippetDirectories=['~/.config/nvim/Ultisnips/']
 
 Plug 'tpope/vim-fugitive'
 
-Plug 'airblade/vim-gitgutter'
-" Use fontawesome icons as signs
-let g:gitgutter_sign_added = '+'
-let g:gitgutter_sign_modified = '>'
-let g:gitgutter_sign_removed = '-'
-let g:gitgutter_sign_removed_first_line = '^'
-let g:gitgutter_sign_modified_removed = '<'
-nmap <silent> gs :GitGutterBufferToggle<CR>
+"Plug 'airblade/vim-gitgutter'
+"" Use fontawesome icons as signs
+"let g:gitgutter_sign_added = '+'
+"let g:gitgutter_sign_modified = '>'
+"let g:gitgutter_sign_removed = '-'
+"let g:gitgutter_sign_removed_first_line = '^'
+"let g:gitgutter_sign_modified_removed = '<'
+"nmap <silent> gs :GitGutterBufferToggle<CR>
 
 
 " let g:gitgutter_override_sign_column_highlight = 1
@@ -391,8 +364,20 @@ let g:silicon = {
 
 call plug#end()
 
+"luafile $HOME/.config/nvim/lua/lsp.lua
+
+"augroup onedarkGroup
+"  autocmd!
+"  let s:white = {'gui': '#ABB2BF', 'cterm': '145', 'cterm16': '7'}
+"  autocmd ColorScheme * call onedark#set_highlight("Normal", {'fg': s:white})
+"  autocmd ColorScheme onedark highlight DiffAdd gui=NONE guibg=#4b6e31 guifg=NONE
+"  autocmd ColorScheme onedark highlight DiffDelete gui=NONE guibg=#400d11 guifg=NONE
+"  autocmd ColorScheme onedark highlight DiffText ctermfg=NONE ctermbg=NONE guifg=NONE guibg=#825e1a
+"augroup END
+
 
 "color onedark
+"color onehalf
 "color onehalfdark
 "color dracula
 "color hybrid
@@ -419,37 +404,43 @@ call plug#end()
 "colorscheme OceanicNext
 "colorscheme palenight
 "color oreno
-colorscheme gruvbox
+"colorscheme gruvbox
+colorscheme tokyonight
 "colorscheme srcery
 
-
 lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    highlight = {
-        enable = true,                    -- false will disable the whole extension
-        disable = {},        -- list of language that will be disabled
-    },
-    incremental_selection = {
-        enable = true,
-        disable = {},
-        keymaps = {},
-    },
-    refactor = {
-      highlight_defintions = {
-        enable = true
-      },
-      smart_rename = {
-        enable = false,
-      },
-      navigation = {
-        enable = false,
-      }
-    },
-    textobjects = { -- syntax-aware textobjects
+require('trim').setup({
+  -- if you want to ignore markdown file.
+  -- you can specify filetypes.
+  disable = {"markdown"},
+})
+require'nvim-treesitter.configs'.setup {
+  highlight = {
     enable = true,
     disable = {},
-    keymaps = {}
+  },
+  incremental_selection = {
+    enable = true,
+    disable = {},
+    keymaps = {},
+  },
+  refactor = {
+    highlight_defintions = {
+      enable = true
     },
-    ensure_installed = 'all' -- one of 'all', 'language', or a list of languages
-  }
+    smart_rename = {
+      enable = false,
+    },
+    navigation = {
+      enable = false,
+    }
+  },
+  textobjects = { -- syntax-aware textobjects
+  enable = true,
+  disable = {},
+  keymaps = {}
+  },
+  ensure_installed = 'all'
+}
+local ts_utils = require 'nvim-treesitter.ts_utils'
 EOF

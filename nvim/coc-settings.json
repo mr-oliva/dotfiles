@@ -24,7 +24,18 @@
     "eslint.run":"onType",
     "eslint.autoFixOnSave": true,
     "python.jediEnabled": false,
+    "git.diffRevision": "master",
+    "git.addGBlameToBufferVar":true,
     "languageserver": {
+      "golang": {
+        "command": "gopls",
+        "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+        "filetypes": ["go"],
+        "initializationOptions": {
+          "usePlaceholders": true,
+          "completeUnimported": true
+        }
+      },
       "dockerfile": {
         "command": "docker-langserver",
         "filetypes": ["dockerfile"],
