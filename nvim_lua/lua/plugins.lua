@@ -62,7 +62,7 @@ return require('packer').startup(function()
             vim.lsp.handlers['workspace/symbol'] = require'lsputil.symbols'.workspace_handler
         end
     }
-    use {'nvim-treesitter/nvim-treesitter', after='nvim-ts-rainbow', config='require"treesitter"'}
+    use {'nvim-treesitter/nvim-treesitter', config='require"treesitter"'}
     use {
         'nvim-lua/completion-nvim',
         after='nvim-lspconfig',
