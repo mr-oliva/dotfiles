@@ -6,11 +6,8 @@ discord
 docker
 figma
 firefox
-font-fira-mono-nerd-font
-font-noto-nerd-font
 gitify
 google-chrome
-google-chrome-canary
 krisp
 maccy
 microsoft-teams

@@ -19,12 +19,13 @@
         "/tmp/*",
         "**/vendor/*"
     ],
-    "codeLens.enable": true,
+    "codeLens.enable": false,
     "coc.preferences.formatOnType":true,
     "eslint.run":"onType",
     "eslint.autoFixOnSave": true,
     "python.jediEnabled": false,
-    "git.diffRevision": "master",
+    "java.home":"/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home",
+    "java.trace.server":"verbose",
     "git.addGBlameToBufferVar":true,
     "languageserver": {
       "golang": {
@@ -55,6 +56,13 @@
         "command": "terraform-lsp",
         "filetypes": ["tf"],
         "initializationOptions": {}
+      },
+      "kotlin": {
+        "command": "$HOME/ghq/github.com/fwcd/kotlin-language-server/server/build/install/server/bin/kotlin-language-server",
+        "filetypes": ["kotlin"],
+        "settings": {
+            "kotlin":{"compiler":{"jvm":{"target":"1.8"}}}
+        }
       }
     },
     "suggest.completionItemKindLabels": {

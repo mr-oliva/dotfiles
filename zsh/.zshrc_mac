@@ -1,10 +1,20 @@
-export PATH="/usr/local/opt/python/libexec/bin:$HOME/nvim-osx64/bin:/usr/local/bin:$HOME/bot-ci/build/nightly/nvim-osx64/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH:/usr/local/Cellar/go/1.14/libexec/bin:/home/linuxbrew/.linuxbrew/bin:$HOME/.yarn/bin"
-export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"
-export GOPATH=$(go env GOPATH)
-export PATH=$GOPATH/bin:$HOME/.bin:$PATH
+export TERM=screen-256color
 
-bindkey -v
-#bindkey -e
+if [ "$TMUX" = "" ]; then
+	tmux;
+fi
+
+export PATH="$HOME/.goenv/bin:/usr/local/opt/python@3.8/bin:$HOME/ghq/github.com/neovim/neovim/build/bin:$HOME/nvim-osx64/bin:/usr/local/bin:$HOME/bot-ci/build/nightly/nvim-osx64/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH:/usr/local/Cellar/go/1.14/libexec/bin:/home/linuxbrew/.linuxbrew/bin:$HOME/.yarn/bin"
+export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"
+export PATH=$HOME/.nodebrew/current/bin:$PATH
+
+export GOENV_ROOT=$HOME/.goenv
+export GOPATH=$HOME/go
+export PATH=$GOENV_ROOT/bin:$GOPATH/bin:$HOME/.bin:$PATH
+eval "$(goenv init -)"
+
+#bindkey -v
+bindkey -e
 
 export HISTFILE=$HOME/.zsh_history
 export HISTSIZE=9999
@@ -21,12 +31,6 @@ export LC_ALL=en_US.UTF-8
 export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
 export CPPFLAGS="-I/usr/local/opt/llvm/include"
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore-vcs --hidden'
-export TERM=xterm-256color
-
-if [ "$TMUX" = "" ]; then
-	#slack-status-changer &
-	tmux;
-fi
 
 
 #eval `ssh-agent` && ssh-add $HOME/.ssh/id_rsa_reso
@@ -59,7 +63,8 @@ zinit ice pick"init.sh" lucid \
 zinit ice atclone"dircolors -b LS_COLORS > c.zsh" atpull'%atclone' pick"c.zsh" nocompile'!'
 zinit light trapd00r/LS_COLORS
 #alias ls='ls --color=auto'
-alias ls='logo-ls'
+#alias ls='logo-ls'
+alias ls='exa --icons'
 
 zinit light b4b4r07/emoji-cli
 
@@ -89,7 +94,7 @@ zinit light grpc/grpc-web
 zinit ice as"program" pick:"gh_*" from:"gh-r" mv"*/bin/gh -> /usr/local/bin/gh"
 zinit light cli/cli
 
-zinit ice from"gh-r" as"program" pick"logo-ls_*" mv"*/logo-ls -> /usr/local/bin/logo-ls"
+zinit ice from:"gh-r" as"program" pick"logo-ls_*" mv"*/logo-ls -> /usr/local/bin/logo-ls"
 zinit light Yash-Handa/logo-ls
 
 #zinit ice wait'3' lucid as"program" has"go" \
@@ -141,25 +146,27 @@ zle -N gcd
 bindkey '^]' gcd
 export PATH="$PATH:$HOME/depot_tools"
 ### End of Zinit's installer chunk
-export PATH="/usr/local/opt/openjdk/bin:$PATH"
-
-alias myTs="npm install --save-dev typescript eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser prettier eslint-config-prettier eslint-plugin-prettier jest @types/jest ts-jest"
+#export PATH="/usr/local/opt/openjdk/bin:$PATH"
+export JAVA_HOME=`/usr/libexec/java_home -v "1.8"`
+export JDK_HOME=$JAVA_HOME
+export PATH="${JAVA_HOME}/bin:$PATH"
 
 
 if (command -v nvim > /dev/null); then
   alias vim='nvim'
   if [[ -n ${VIMRUNTIME} ]]; then
     alias vim='nvr --remote-wait-silent'
+    alias nvim='nvr --remote-wait-silent'
   fi
 fi
 
-export EDITOR=vim
+export EDITOR=nvim
 export CVSEDITOR="${EDITOR}"
 export SVN_EDITOR="${EDITOR}"
 export GIT_EDITOR="${EDITOR}"
 
 eval "$(direnv hook zsh)"
-
+eval "$(rbenv init -)"
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/oliva/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/oliva/google-cloud-sdk/path.zsh.inc'; fi
@@ -170,3 +177,4 @@ if [ -f '/Users/oliva/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/oli
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
 [ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ] && . "/usr/local/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+export PATH="/usr/local/opt/terraform@0.11/bin:$PATH"
