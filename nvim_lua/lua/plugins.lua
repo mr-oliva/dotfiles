@@ -78,10 +78,10 @@ return require('packer').startup(function()
         end,
         requires = {{'nvim-treesitter/nvim-treesitter'},{'nvim-treesitter/completion-treesitter'}}
     }
-    use {
-        'p00f/nvim-ts-rainbow',
-        requires = 'nvim-treesitter/nvim-treesitter'
-    }
+    --use {
+    --    'p00f/nvim-ts-rainbow',
+    --    requires = 'nvim-treesitter/nvim-treesitter'
+    --}
     use {'romgrk/nvim-treesitter-context',requires = 'nvim-treesitter/nvim-treesitter'}
     use {
         'ElPiloto/sidekick.nvim',
@@ -132,7 +132,7 @@ return require('packer').startup(function()
     use 'rhysd/vim-gfm-syntax'
     use {'glepnir/indent-guides.nvim', config='require"indent_guides".setup({})'}
     use 'f-person/git-blame.nvim'
-    use 'mattn/vim-goimports'
+    --use 'mattn/vim-goimports'
     use 'ghifarit53/tokyonight-vim'
     use {'cappyzawa/trim.nvim', config='require"nvim-trim"'}
     use 'editorconfig/editorconfig-vim'
