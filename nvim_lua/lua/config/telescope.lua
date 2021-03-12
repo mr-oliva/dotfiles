@@ -7,14 +7,14 @@ require'telescope.init'.setup{ defaults = {
     mappings = {
       i = {
         --["<c-c>"] = false,
-        ["<c-x>"] = actions.goto_file_selection_split,
-        ["<c-v>"] = actions.goto_file_selection_vsplit
+        ["<c-x>"] = actions.select_horizontal,
+        ["<c-v>"] = actions.select_vertical
       },
       n = {
         --["<c-[>"] = actions.close,
         --["<c-c>"] = false,
-        ["<c-x>"] = actions.goto_file_selection_split,
-        ["<c-v>"] = actions.goto_file_selection_vsplit
+        ["<c-x>"] = actions.select_horizontal,
+        ["<c-v>"] = actions.select_vertical
       }
     }
  }
