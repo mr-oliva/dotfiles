@@ -4,8 +4,8 @@ fi
 export TERM=screen-256color
 #export TERM=xterm-256color
 
-#export PATH="$HOME/nvim-osx64/bin:$HOME/ghq/github.com/neovim/neovim/build/bin:/usr/local/bin:$HOME/bot-ci/build/nightly/nvim-osx64/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH:$HOME/.yarn/bin"
-export PATH="$HOME/ghq/github.com/neovim/neovim/build/bin:$HOME/nvim-osx64/bin:/usr/local/bin:$HOME/bot-ci/build/nightly/nvim-osx64/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH:$HOME/.yarn/bin"
+export PATH="$HOME/nvim-osx64/bin:$HOME/ghq/github.com/neovim/neovim/build/bin:/usr/local/bin:$HOME/bot-ci/build/nightly/nvim-osx64/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH:$HOME/.yarn/bin"
+#export PATH="$HOME/ghq/github.com/neovim/neovim/build/bin:$HOME/nvim-osx64/bin:/usr/local/bin:$HOME/bot-ci/build/nightly/nvim-osx64/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH:$HOME/.yarn/bin"
 #export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"
 
 
@@ -92,6 +92,10 @@ zinit light cli/cli
 
 zinit ice from:"gh-r" as"program" pick"logo-ls_*" mv"*/logo-ls -> /usr/local/bin/logo-ls"
 zinit light Yash-Handa/logo-ls
+
+zinit ice lucid as"program" from:"gh-r" \
+  mv"tree-sitter-* -> tree-sitter"
+zinit light tree-sitter/tree-sitter
 
 #zinit ice wait'3' lucid as"program" has"go" \
 #    atclone"GO111MODULE=on go install ./..." atpull"%atclone"

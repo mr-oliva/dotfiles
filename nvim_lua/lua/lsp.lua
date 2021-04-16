@@ -9,25 +9,6 @@ local lsp = require('lspconfig')
 
 lsp.tsserver.setup{}
 
-function Goimports(timeoutms)
-  local context = { source = { organizeImports = true } }
-  vim.validate { context = { context, "t", true } }
-
-  local params = vim.lsp.util.make_range_params()
-  params.context = context
-
-  local method = "textDocument/codeAction"
-  local resp = vim.lsp.buf_request_sync(0, method, params, timeoutms)
-  if resp and resp[1] then
-    local result = resp[1].result
-    if result and result[1] then
-      local edit = result[1].edit
-      vim.lsp.util.apply_workspace_edit(edit)
-    end
-  end
-
-  vim.lsp.buf.formatting()
-end
 lsp.gopls.setup{
     cmd = {"gopls", "serve"},
     settings = {
@@ -39,6 +20,37 @@ lsp.gopls.setup{
         }
     }
 }
+function Goimports(timeout_ms)
+  print "action"
+  local context = { source = { organizeImports = true } }
+  vim.validate { context = { context, "t", true } }
+
+  local params = vim.lsp.util.make_range_params()
+  params.context = context
+
+  -- See the implementation of the textDocument/codeAction callback
+  -- (lua/vim/lsp/handler.lua) for how to do this properly.
+  local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, timeout_ms)
+  if not result or next(result) == nil then return end
+  local actions = result[1].result
+  if not actions then return end
+  local action = actions[1]
+
+  -- textDocument/codeAction can return either Command[] or CodeAction[]. If it
+  -- is a CodeAction, it can have either an edit, a command or both. Edits
+  -- should be executed first.
+  if action.edit or type(action.command) == "table" then
+    if action.edit then
+      vim.lsp.util.apply_workspace_edit(action.edit)
+    end
+    if type(action.command) == "table" then
+      vim.lsp.buf.execute_command(action.command)
+    end
+  else
+    vim.lsp.buf.execute_command(action)
+  end
+end
+
 lsp.clangd.setup{}
 
 local home = os.getenv("HOME")
@@ -63,6 +75,9 @@ lsp.sumneko_lua.setup{
 }
 
 lsp.pyright.setup{}
+lsp.solargraph.setup{
+    cmd = {"/Users/oliva/.gem/ruby/2.6.0/bin/solargraph", "stdio"}
+}
 
 --https://github.com/iamcco/diagnostic-languageserver
 --lsp.diagnosticls.setup {
@@ -125,4 +140,4 @@ util.map('n', '<space>r', '<cmd>lua vim.lsp.buf.references()<CR>')
 util.map('n', '<space>s', '<cmd>lua vim.lsp.buf.document_symbol()<CR>')
 
 vim.cmd([[ autocmd BufWritePost *.js,*.ts,*.tsx,*.jsx lua vim.lsp.buf.formatting() ]])
-vim.cmd([[ autocmd BufWritePost *.go lua Goimports(1000) ]])
+--vim.cmd([[ autocmd BufWritePost *.go lua Goimports(1000) ]])

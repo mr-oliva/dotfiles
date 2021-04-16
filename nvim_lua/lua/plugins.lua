@@ -94,8 +94,8 @@ return require('packer').startup(function()
         "glepnir/zephyr-nvim",
         requires = "nvim-treesitter/nvim-treesitter",
         config = function()
-            require('zephyr').get_zephyr_color()
-            vim.g.colors_name = 'zephyr'
+            require('zephyr')
+            --vim.g.colors_name = 'zephyr'
             vim.cmd [[ highlight DiffDelete gui=NONE guibg=#2D171C guifg=NONE ]]
             vim.cmd [[ highlight DiffAdd gui=NONE guibg=#13231D guifg=NONE ]]
             vim.cmd [[ highlight DiffChange gui=NONE guibg=#575403 guifg=NONE ]]
@@ -158,6 +158,36 @@ return require('packer').startup(function()
         end
     }
     use {
+        'onsails/lspkind-nvim',
+        config = function ()
+            require('lspkind').init({
+                -- with_text = true,
+                symbol_map = {
+                  Text = '',
+                  Method = 'ƒ',
+                  Function = '',
+                  Constructor = '',
+                  Variable = '',
+                  Class = '',
+                  Interface = 'ﰮ',
+                  Module = '',
+                  Property = '',
+                  Unit = '',
+                  Value = '',
+                  Enum = '了',
+                  Keyword = '',
+                  Snippet = '﬌',
+                  Color = '',
+                  File = '',
+                  Folder = '',
+                  EnumMember = '',
+                  Constant = '',
+                  Struct = ''
+                },
+            })
+        end
+    }
+    use {
         'p00f/nvim-ts-rainbow',
         requires = 'nvim-treesitter/nvim-treesitter'
     }
@@ -183,6 +213,15 @@ return require('packer').startup(function()
         requires = {{'nvim-lua/popup.nvim'}, {'nvim-lua/plenary.nvim'}}
     }
     use {'nvim-telescope/telescope-symbols.nvim', requires='nvim-telescope/telescope.nvim'}
+    --use {
+    --    'pwntester/octo.nvim',
+    --    requires = {
+    --        {'nvim-lua/popup.nvim'},
+    --        {'nvim-lua/plenary.nvim'},
+    --        {'nvim-telescope/telescope.nvim'}
+    --    },
+    --    config = 'require"telescope".load_extention("octo")'
+    --}
     use {
         'lewis6991/gitsigns.nvim',
         requires = {
@@ -192,7 +231,6 @@ return require('packer').startup(function()
             require"gitsigns".setup()
         end
     }
-
     use {
         'glepnir/galaxyline.nvim',
         requires = {
@@ -224,7 +262,7 @@ return require('packer').startup(function()
     }
     use {'cappyzawa/trim.nvim', config='require"nvim-trim"'}
     use 'editorconfig/editorconfig-vim'
-    use {'npxbr/glow.nvim', run=':GlowInstall'}
+    -- use {'npxbr/glow.nvim', run=':GlowInstall'}
     use {
         'akinsho/nvim-toggleterm.lua',
         config=function()
@@ -256,8 +294,15 @@ return require('packer').startup(function()
         },
         config = "require('telescope').load_extension('gh')"
     }
+    use {
+        'kosayoda/nvim-lightbulb',
+        config = function ()
+            vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'nvim-lightbulb'.update_lightbulb()]]
+        end
+    }
     use {'windwp/nvim-autopairs', config='require"config.autopairs"'}
     use 'tjdevries/vlog.nvim'
     use "matsub/rtcweb-sdp.vim"
     use "mattn/emmet-vim"
+    use "mattn/vim-goimports"
 end)

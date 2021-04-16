@@ -5,28 +5,7 @@ require'nvim-treesitter.configs'.setup {
   },
   rainbow = {
     enable = true,
-    disable = {'bash'} -- please disable bash until I figure #1 out
+    extended_mode = true,
   },
-  incremental_selection = {
-    enable = true,
-    disable = {},
-    keymaps = {},
-  },
-  refactor = {
-    highlight_defintions = {
-      enable = true
-    },
-    smart_rename = {
-      enable = false,
-    },
-    navigation = {
-      enable = false,
-    }
-  },
-  textobjects = { -- syntax-aware textobjects
-    enable = true,
-    disable = {},
-    keymaps = {}
-  },
-  ensure_installed = 'all'
+  ensure_installed = 'maintained'
 }
