@@ -58,7 +58,13 @@ return require('packer').startup(function()
             require('nvim_comment').setup()
         end
     }
-    use {'neovim/nvim-lspconfig', config='require"lsp"'}
+    use {
+        'neovim/nvim-lspconfig',
+        config='require"lsp"',
+        requires = {
+            'kabouzeid/nvim-lspinstall'
+        }
+    }
     use {
         'glepnir/lspsaga.nvim',
         requires = {

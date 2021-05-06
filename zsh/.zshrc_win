@@ -1,0 +1,191 @@
+if [ $HOME/.zshrc -nt ~/.zshrc.zwc ]; then
+  zcompile ~/.zshrc
+fi
+#export TERM=screen-256color
+#export TERM=xterm-256color
+
+export PATH="/usr/local/bin:$HOME/bot-ci/build/nightly/nvim-osx64/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH:$HOME/.yarn/bin"
+#export PATH="$HOME/ghq/github.com/neovim/neovim/build/bin:$HOME/nvim-osx64/bin:/usr/local/bin:$HOME/bot-ci/build/nightly/nvim-osx64/bin:/usr/local/go/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH:$HOME/.yarn/bin"
+#export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"
+
+
+bindkey -v
+#bindkey -e
+
+export HISTFILE=$HOME/.zsh_history
+export HISTSIZE=9999
+export SAVEHIST=999999
+setopt hist_ignore_dups
+setopt share_history
+
+export LANG="en_US.UTF-8"
+export LANGUAGE="en_US.UTF-8"
+export LC_ALL=en_US.UTF-8
+#export LANG="ja_JP.UTF-8"
+#export LANGUAGE="ja_JP.UTF-8"
+#export LC_ALL="ja_JP.UTF-8"
+#export LDFLAGS="-L/usr/local/opt/libiconv/lib"
+#export CPPFLAGS="-I/usr/local/opt/libiconv/include"
+export FZF_DEFAULT_COMMAND='rg --files --no-ignore-vcs --hidden'
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+ --color=fg:#bbc2cf,bg:#282c34,hl:#51afef
+ --color=fg+:#5b6268,bg+:#b3deef,hl+:#3bb6c4
+ --color=info:#afaf87,prompt:#ff6c6b,pointer:#d16d9e
+ --color=marker:#98be65,spinner:#d16d9e,header:#1abc9c'
+
+
+#eval `ssh-agent` && ssh-add $HOME/.ssh/id_rsa_reso
+
+if [ ! -e "$HOME/.zinit" ]; then
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
+fi
+
+### Added by Zplugin's installer
+source "$HOME/.zinit/bin/zinit.zsh"
+autoload -Uz _zplugin
+(( ${+_comps} )) && _comps[zplugin]=_zplugin
+### End of Zplugin's installer chunk
+#
+#
+zinit light zdharma/fast-syntax-highlighting
+
+# Plugin history-search-multi-word loaded with investigating.
+zinit load zdharma/history-search-multi-word
+zinit ice from"gh-r" as"program"
+zinit load junegunn/fzf-bin
+zinit ice pick"init.sh" lucid \
+  atload'export ENHANCD_FILTER="fzf --height 50% --reverse --ansi";export ENHANCD_DOT_SHOW_FULLPATH=1'
+
+zinit ice atclone"dircolors -b LS_COLORS > c.zsh" atpull'%atclone' pick"c.zsh" nocompile'!'
+zinit light trapd00r/LS_COLORS
+#alias ls='ls --color=auto'
+#alias ls='logo-ls'
+alias ls='exa --icons'
+
+zinit light b4b4r07/emoji-cli
+
+
+#zinit ice from"gh-r" as"program"
+#zinit load junegunn/fzf-bin
+
+zinit ice as"program" make'!' atclone'./direnv hook zsh > zhook.zsh' atpull'%atclone' src"zhook.zsh"
+zinit light direnv/direnv
+
+zinit ice from"gh-r" as"program" pick"jq-osx-amd64" mv"jq-osx-amd64 -> /usr/local/bin/jq"
+zinit load stedolan/jq
+
+
+zinit ice as"program" pick:"bin/anyenv"
+zinit light anyenv/anyenv
+
+zinit ice as"program" pick:"hub-*/bin/hub" from:"gh-r"
+zinit light github/hub
+
+zinit ice as"program" pick:"protoc-*-*/bin/protoc" from:"gh-r" mv"bin/protoc -> /usr/local/bin/protoc"
+zinit light protocolbuffers/protobuf
+
+zinit ice as"program" pick:"protoc-gen-grpc-web-*" from:"gh-r" mv"protoc-gen-grpc-web-* -> /usr/local/bin/protoc-gen-grpc-web"
+zinit light grpc/grpc-web
+
+zinit ice as"program" pick:"gh_*" from:"gh-r" mv"*/bin/gh -> /usr/local/bin/gh"
+zinit light cli/cli
+
+zinit ice from:"gh-r" as"program" pick"logo-ls_*" mv"*/logo-ls -> /usr/local/bin/logo-ls"
+zinit light Yash-Handa/logo-ls
+
+zinit ice lucid as"program" from:"gh-r" \
+  mv"tree-sitter-* -> tree-sitter"
+zinit light tree-sitter/tree-sitter
+
+#zinit ice wait'3' lucid as"program" has"go" \
+#    atclone"GO111MODULE=on go install ./..." atpull"%atclone"
+#zinit light golang/tools
+
+# install manually
+#zinit ice lucid as"program" from"gh-r"
+#zinit light starship/starship
+
+zinit ice wait'2' lucid as"program" from:"gh-r"
+zinit light juliosueiras/terraform-lsp
+
+#export LIBGL_ALWAYS_INDIRECT=1
+
+alias lg='lazygit'
+### End of Zinit's installer chunk
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+
+export PATH="/usr/local/opt/llvm/bin:$PATH"
+#[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+if (which starship > /dev/null) then
+  eval "$(starship init zsh)"
+fi
+
+# The next line enables shell command completion for gcloud.
+#if [ -f '/Users/bookun/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/bookun/google-cloud-sdk/completion.zsh.inc'; fi
+gcd () {
+        local repo_path=`ghq list --full-path | fzf --reverse --preview "bat --color=always {}/README.md"`
+        if [ -n "$repo_path" ]; then
+            BUFFER="cd ${repo_path}"
+            zle accept-line
+        fi
+        zle clear-screen
+}
+
+fzf-src () {
+    local repo=$(ghq list | fzf --query "$LBUFFER")
+    if [ -n "$repo" ]; then
+        repo=$(ghq list --full-path --exact $repo)
+        BUFFER="cd ${repo}"
+        zle accept-line
+    fi
+    zle clear-screen
+}
+zle -N gcd
+bindkey '^]' gcd
+export PATH="$PATH:$HOME/depot_tools"
+### End of Zinit's installer chunk
+#export PATH="/usr/local/opt/openjdk/bin:$PATH"
+export JAVA_HOME=`/usr/libexec/java_home -v "1.8"`
+export JDK_HOME=$JAVA_HOME
+export PATH="${JAVA_HOME}/bin:$PATH"
+
+
+if (command -v nvim > /dev/null); then
+  alias vim='nvim'
+  if [[ -n ${VIMRUNTIME} ]]; then
+    alias vim='nvr --remote-wait-silent'
+    alias nvim='nvr --remote-wait-silent'
+  fi
+fi
+
+export EDITOR=nvim
+export CVSEDITOR="${EDITOR}"
+export SVN_EDITOR="${EDITOR}"
+export GIT_EDITOR="${EDITOR}"
+
+eval "$(direnv hook zsh)"
+#eval "$(rbenv init -)"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/usr/local/opt/nvm/etc/bash_completion.d/nvm" ] && . "/usr/local/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+export PATH="/usr/local/opt/terraform@0.11/bin:$PATH"
+
+alias toggle_gs="pushd $HOME/ghq/github.com/starship/starship && cargo run toggle git_status disabled && popd"
+
+eval "$(anyenv init - --no-rehash)"
+
+PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+export PATH="$HOME/.pyenv/bin:$PATH"
+export PATH="/usr/local/bin:$PATH"
+
+#eval "$(pyenv init -)"
+#eval "$(pyenv virtualenv-init -)"
+#export LDFLAGS="-L/usr/local/opt/zlib/lib -L/usr/local/opt/bzip2/lib"
+#export CPPFLAGS="-I/usr/local/opt/zlib/include -I/usr/local/opt/bzip2/include"
+#if (which zprof > /dev/null) ;then
+#  zprof > profile2.txt
+#fi

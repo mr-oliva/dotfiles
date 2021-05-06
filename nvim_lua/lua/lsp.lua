@@ -5,21 +5,76 @@
 --vim.cmd 'set pumheight=10'
 
 local util = require('util')
-local lsp = require('lspconfig')
+local function setup_servers()
+    require'lspinstall'.setup()
+    -- get all installed servers
+    local servers = require'lspinstall'.installed_servers()
+    for _, server in pairs(servers) do
+        local config = {}
+        if server == "go" then
+            config = {
+                cmd = {"gopls", "serve"},
+                settings = {
+                    gopls = {
+                        analyses = {
+                            unusedparams = true,
+                        },
+                        staticcheck = true,
+                    }
+                }
+            }
+        end
+        if server == "lua" then
+            --config = {
+            --    --cmd = {vim.fn.stdpath("data").."/bin/linux/lua-language-server", "-E", vim.fn.stdpath("data") .. "/main.lua"},
+            --    settings = {
+            --        Lua = {
+            --            diagnostics = {
+            --                globals = {'vim'},
+            --            },
+            --            workspace = {
+            --                library = {
+            --                    [vim.fn.expand('$VIMRUNTIME/lua')] = true,
+            --                    [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+            --                },
+            --            },
+            --        },
+            --    }
+            --}
+            -- Configure lua language server for neovim development
+            local sumneko_root = vim.fn.stdpath("data").."/lspinstall/lua/sumneko-lua/extension/server"
+            config = {
+                cmd = {sumneko_root .. "/bin/Linux/lua-language-server", "-E", sumneko_root .. "/main.lua"},
+                settings = {
+                    Lua = {
+                      runtime = {
+                        -- LuaJIT in the case of Neovim
+                        version = 'LuaJIT',
+                        path = vim.split(package.path, ';'),
+                      },
+                      diagnostics = {
+                        -- Get the language server to recognize the `vim` global
+                        globals = {'vim'},
+                      },
+                      workspace = {
+                        -- Make the server aware of Neovim runtime files
+                        library = {
+                          [vim.fn.expand('$VIMRUNTIME/lua')] = true,
+                          [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+                        },
+                      },
+                    },
+                },
+            }
+        end
+        -- for debug
+        -- print(vim.inspect(config))
+        require'lspconfig'[server].setup{config}
+    end
+end
 
-lsp.tsserver.setup{}
+setup_servers()
 
-lsp.gopls.setup{
-    cmd = {"gopls", "serve"},
-    settings = {
-        gopls = {
-            analyses = {
-                unusedparams = true,
-            },
-            staticcheck = true,
-        }
-    }
-}
 function Goimports(timeout_ms)
   print "action"
   local context = { source = { organizeImports = true } }
@@ -50,34 +105,6 @@ function Goimports(timeout_ms)
     vim.lsp.buf.execute_command(action)
   end
 end
-
-lsp.clangd.setup{}
-
-local home = os.getenv("HOME")
-local sumneko_root_path = home .. "/ghq/github.com/sumneko/lua-language-server"
-lsp.sumneko_lua.setup{
-    cmd = {sumneko_root_path .. "/bin/macOS/lua-language-server", "-E", sumneko_root_path .. "/main.lua"},
-    settings = {
-        Lua = {
-            diagnostics = {
-                -- vimモジュールを設定
-                globals = {'vim'},
-            },
-            workspace = {
-                -- Neovimのランタイムファイルを設定
-                library = {
-                    [vim.fn.expand('$VIMRUNTIME/lua')] = true,
-                    [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
-                },
-            },
-        },
-    }
-}
-
-lsp.pyright.setup{}
-lsp.solargraph.setup{
-    cmd = {"/Users/oliva/.gem/ruby/2.6.0/bin/solargraph", "stdio"}
-}
 
 --https://github.com/iamcco/diagnostic-languageserver
 --lsp.diagnosticls.setup {
